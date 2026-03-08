@@ -1,0 +1,40 @@
+class AppUrls {
+  static String baseUrl = "https://scan2home.selimreza.dev/api/v1";
+  static String imageUrl = "https://scan2home.selimreza.dev";
+  //authetication
+  static String login = "/user/auth/login/";
+  static String loginAgent = "/agent/auth/login/";
+  static String signUp = "/user/auth/register/";
+  static String signUpAgent = "/agent/auth/register/";
+  static String authDetails = "/auth/users/me/";
+
+  static String forgotPasswordAgent = "/agent/auth/forgot-password/";
+  static String forgotPassword = '/user/auth/forgot-password/';
+
+  static String verfiyOtpAgent = "/agent/auth/verify-otp/";
+  static String verfiyOtpUser = "/user/auth/verify-otp/";
+
+  static String resetPasswordAgent = "/agent/auth/reset-password/";
+  static String resetPassword = "/user/auth/reset-password/";
+
+  static String createPassword = "/user/auth/reset-password/";
+  static String createPaswordAgent = "/agent/auth/reset-password/";
+
+  //profile section
+  static String profile = "/user/auth/profile/";
+  static String profileAgent = "/agent/auth/profile/";
+
+  static String editProfile = "/user/auth/profile/";
+  static String editProfileAgents = "/agent/auth/profile/";
+
+  static String chnagePassword = "/user/auth/change-password/";
+  static String chnagePasswordAgent = "/user/auth/change-password/";
+
+  //user or customer portion
+  static String chatAi = "/user/chat/";
+  static String getProperty = "/user/properties/";
+  static String getPropertyType = "/admin/settings/property-types/";
+  static String addPropertyFav = "/user/properties/";
+  static String propertyDetails = "/user/properties/";
+  static String getSimilerProperty = "/user/properties/";
+}
