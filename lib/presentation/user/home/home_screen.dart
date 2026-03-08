@@ -224,7 +224,9 @@ class _HomeScreenState extends State<HomeScreen> {
       children: List.generate(provider.propertyList.length, (index) {
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
-          child: PropertyCard(
+          child: 
+        
+          PropertyCard(
             isFav: provider.propertyList[index].isFav,
             onFavoriteTap: () async {
               final response = await provider.addFav(
@@ -270,6 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
             distance: provider.propertyList[index].rating,
             badge: provider.propertyList[index].isNew ? " " : " ",
           ),
+        
         );
       }),
     );

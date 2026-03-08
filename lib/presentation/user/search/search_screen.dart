@@ -1,10 +1,12 @@
 import 'package:dips/components/custom_button.dart';
+import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/components/property_card.dart';
 import 'package:dips/core/routing/route_path.dart';
+import 'package:dips/presentation/user/home/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -14,12 +16,15 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  RangeValues _priceRange = const RangeValues(200, 1000);
+  RangeValues _priceRange = const RangeValues(100000, 500000);
   String _selectedPropertyType = 'Any Type';
   String _selectedAmenities = 'Any Type';
   int _selectedBedrooms = -1;
+
+  TextEditingController searchController = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeProvider>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -55,14 +60,30 @@ class _SearchScreenState extends State<SearchScreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CustomButton(
-                    onPressed: () {},
-                    title: "Apply Filters (2 properties)",
+                    onPressed: () async {
+                      await provider.searchFilter(
+                        searchController.text,
+                        _selectedPropertyType == "Any Type"
+                            ? ""
+                            : _selectedPropertyType,
+                        _priceRange.start.toInt().toString(),
+                        _priceRange.end.toInt().toString(),
+                        _selectedBedrooms == -1
+                            ? ""
+                            : _selectedBedrooms.toString(),
+                        _selectedAmenities == "Any Type"
+                            ? ""
+                            : _selectedAmenities,
+                      );
+                    },
+                    title:
+                        "Apply Filters (${provider.searchFilterList.length} properties)",
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Showing 2 properties',
+                    'Showing ${provider.searchFilterList.length} properties',
                     style: TextStyle(
                       color: const Color(0xFF0A0A0A),
                       fontSize: 16,
@@ -71,56 +92,69 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                 ),
-                PropertyCard(
-                  onTap: () {
-                    context.push(RoutePath.myPropertiesDetails);
-                  },
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
-                  title: 'Modern 3-Bed Apartment',
-                  rating: '4.5',
-                  location: 'Parker Rd New Mexico',
-                  beds: 3,
-                  baths: 2,
-                  sqft: '1,200 sqft',
-                  price: '£250,000',
-                  distance: '2.3 km',
-                  badge: 'Best Offer',
-                ),
-                const SizedBox(height: 16),
-                PropertyCard(
-                  onTap: () {
-                    context.push(RoutePath.myPropertiesDetails);
-                  },
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=800',
-                  title: 'Contemporary Apartment',
-                  rating: '4.3',
-                  location: 'Dhanmondi, Dhaka',
-                  beds: 2,
-                  baths: 2,
-                  sqft: '950 sqft',
-                  price: '£180,000',
-                  distance: '1.8 km',
-                  badge: null,
-                ),
-                const SizedBox(height: 16),
-                PropertyCard(
-                  onTap: () {
-                    context.push(RoutePath.myPropertiesDetails);
-                  },
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800',
-                  title: 'Luxury Living Space',
-                  rating: '4.7',
-                  location: 'Gulshan, Dhaka',
-                  beds: 3,
-                  baths: 3,
-                  sqft: '1,500 sqft',
-                  price: '£320,000',
-                  distance: '3.5 km',
-                  badge: 'New',
-                ),
+
+                provider.isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: List.generate(provider.searchFilterList.length, (
+                          index,
+                        ) {
+                          return PropertyCard(
+                            isFav: provider.propertyList[index].isFav,
+                            onFavoriteTap: () async {
+                              final response = await provider.addFav(
+                                provider.propertyList[index].id,
+                              );
+                              if (response) {
+                                AppSnackbar.show(
+                                  context,
+                                  title: "Add Favourite",
+                                  message: "Added Favourite Successfully",
+                                  type: SnackType.success,
+                                );
+                              } else {
+                                AppSnackbar.show(
+                                  context,
+                                  title: "Add Favourite",
+                                  message: "Added Favourite Not Successfully",
+                                  type: SnackType.error,
+                                );
+                              }
+                            },
+                            onTap: () async {
+                              final data = await provider.getPropertyDetails(
+                                context,
+                                provider.propertyList[index].id,
+                              );
+                              await provider.getSimilerProperty(
+                                provider.propertyList[index].id,
+                              );
+                              if (data) {
+                                context.push(RoutePath.myPropertiesDetails);
+                              }
+                            },
+                            imageUrl:
+                                provider.searchFilterList[index].image.isEmpty
+                                ? 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800'
+                                : provider.searchFilterList[index].image,
+                            title: provider.searchFilterList[index].name,
+                            rating: provider.searchFilterList[index].rating,
+                            location: provider.searchFilterList[index].location,
+                            beds: provider.searchFilterList[index].bed,
+                            baths: provider.searchFilterList[index].baths,
+                            sqft: provider.searchFilterList[index].size
+                                .toString(),
+                            price:
+                                "£ ${provider.searchFilterList[index].price.toString()}",
+                            distance: provider.searchFilterList[index].rating,
+                            badge: provider.searchFilterList[index].isNew
+                                ? "New"
+                                : provider.searchFilterList[index].isFeature
+                                ? "Feature"
+                                : "N/A",
+                          );
+                        }),
+                      ),
               ],
             ),
           ),
@@ -147,6 +181,7 @@ class _SearchScreenState extends State<SearchScreen> {
               border: Border.all(color: const Color(0xFFE5E7EB)),
             ),
             child: TextField(
+              controller: searchController,
               decoration: InputDecoration(
                 hintText: 'Search by location, postcode...',
                 hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
@@ -230,7 +265,7 @@ class _SearchScreenState extends State<SearchScreen> {
             child: RangeSlider(
               values: _priceRange,
               min: 0,
-              max: 2000,
+              max: 2000000,
               divisions: 40,
               onChanged: (RangeValues values) {
                 setState(() {
@@ -245,14 +280,14 @@ class _SearchScreenState extends State<SearchScreen> {
               Expanded(
                 child: _buildPriceBox(
                   'Min Price',
-                  '£${_priceRange.start.round()}k',
+                  '£${_priceRange.start.toInt()}',
                 ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: _buildPriceBox(
                   'Max Price',
-                  '£${_priceRange.end.round()}k',
+                  '£${_priceRange.end.toInt()}',
                 ),
               ),
             ],

@@ -37,4 +37,10 @@ class AppUrls {
   static String addPropertyFav = "/user/properties/";
   static String propertyDetails = "/user/properties/";
   static String getSimilerProperty = "/user/properties/";
+  static String makeOffer = "/user/offers/";
+  static String bookingMeeting = "/user/bookings/";
+  static String giveRating = "/user/properties/agent/";
+  static String searchFilter = "/user/properties/";
+
+  static String favourite = "/user/properties/favourites/";
 }

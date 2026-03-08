@@ -4,6 +4,7 @@ import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/components/property_card.dart';
 import 'package:dips/core/routing/route_path.dart';
 import 'package:dips/presentation/user/home/home_provider.dart';
+import 'package:dips/presentation/user/home/widget/agent_details.dart';
 import 'package:dips/presentation/user/home/widget/booking_view_dialog.dart';
 import 'package:dips/presentation/user/home/widget/make_offer_bottom_sheet.dart';
 import 'package:flutter/material.dart';
@@ -461,32 +462,42 @@ class PropertyDetailScreen extends StatelessWidget {
 
                     SizedBox(
                       width: double.infinity,
-                      child: DecoratedBox(
-                        decoration: ShapeDecoration(
-                          color: const Color(0xFF041E41),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const AgentDetailsModal(),
+                          );
+                        },
+                        child: DecoratedBox(
+                          decoration: ShapeDecoration(
+                            color: const Color(0xFF041E41),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                        ),
 
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.visibility, color: Colors.white),
-                              CustomPadding().hPad5,
-                              Text(
-                                'VIew Agent Details',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.25,
-                                  fontFamily: 'Lato',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.43,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.visibility, color: Colors.white),
+                                CustomPadding().hPad5,
+                                Text(
+                                  'VIew Agent Details',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.25,
+                                    fontFamily: 'Lato',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.43,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),

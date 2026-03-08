@@ -1,4 +1,8 @@
+import 'package:dips/components/custom_loading_dialog.dart';
+import 'package:dips/components/custom_snackbar.dart';
+import 'package:dips/presentation/user/home/home_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MakeOfferBottomSheet extends StatefulWidget {
   const MakeOfferBottomSheet({Key? key}) : super(key: key);
@@ -9,23 +13,18 @@ class MakeOfferBottomSheet extends StatefulWidget {
 
 class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
   final TextEditingController fullNameController = TextEditingController(
-    text: 'John Doe',
+    text: '',
   );
-  final TextEditingController emailController = TextEditingController(
-    text: 'john@example.com',
-  );
-  final TextEditingController phoneController = TextEditingController(
-    text: '1234567890',
-  );
-  final TextEditingController offerController = TextEditingController(
-    text: '250000',
-  );
+  final TextEditingController emailController = TextEditingController(text: '');
+  final TextEditingController phoneController = TextEditingController(text: '');
+  final TextEditingController offerController = TextEditingController(text: '');
   final TextEditingController messageController = TextEditingController(
-    text: 'Additional comments...',
+    text: '',
   );
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeProvider>();
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -112,12 +111,12 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                               ),
                             ),
                             const SizedBox(width: 16),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Modern 3-Bed Apartment',
+                                    provider.propertyDetailsJson.title!,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -126,7 +125,7 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                                   ),
                                   SizedBox(height: 4),
                                   Text(
-                                    '£250,000',
+                                    '£${provider.propertyDetailsJson.price}',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 20,
@@ -195,14 +194,36 @@ class _MakeOfferBottomSheetState extends State<MakeOfferBottomSheet> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Offer submitted successfully!'),
-                                backgroundColor: Color(0xFF1A237E),
-                              ),
+                          onPressed: () async {
+                            CustomLoading.show(context);
+                            final response = await provider.makeOffer(
+                              fullNameController.text,
+                              emailController.text,
+                              offerController.text,
+                              phoneController.text,
+                              messageController.text.isEmpty
+                                  ? ""
+                                  : messageController.text,
                             );
+                            CustomLoading.hide(context);
+
+                            if (response) {
+                              Navigator.pop(context);
+                              AppSnackbar.show(
+                                context,
+                                title: "Make Offer",
+                                message: "Make offer successfully",
+                                type: SnackType.success,
+                              );
+                            } else {
+                              Navigator.pop(context);
+                              AppSnackbar.show(
+                                context,
+                                title: "Make Offer",
+                                message: "Make offer not successfully",
+                                type: SnackType.error,
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF1A237E),

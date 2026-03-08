@@ -1,4 +1,8 @@
+import 'package:dips/components/custom_loading_dialog.dart';
+import 'package:dips/components/custom_snackbar.dart';
+import 'package:dips/presentation/user/home/home_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BookViewingDialog extends StatefulWidget {
   const BookViewingDialog({Key? key}) : super(key: key);
@@ -8,7 +12,8 @@ class BookViewingDialog extends StatefulWidget {
 }
 
 class _BookViewingDialogState extends State<BookViewingDialog> {
-  DateTime selectedDate = DateTime(2025, 11, 3);
+  // Initializing with the current date (March 2026)
+  DateTime selectedDate = DateTime.now();
   String? selectedTime;
   final TextEditingController notesController = TextEditingController();
 
@@ -24,8 +29,13 @@ class _BookViewingDialogState extends State<BookViewingDialog> {
     '5:00 PM',
   ];
 
+  // Helper to format date as 2026-03-10
+  String get _formattedDate =>
+      "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeProvider>();
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -59,31 +69,24 @@ class _BookViewingDialogState extends State<BookViewingDialog> {
               ),
               const SizedBox(height: 24),
 
-              // Select Date
               const Text(
                 'Select Date',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-
-              // Calendar
               _buildCalendar(),
 
               const SizedBox(height: 24),
 
-              // Select Time
               const Text(
                 'Select Time',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-
-              // Time slots grid
               _buildTimeSlots(),
 
               const SizedBox(height: 24),
 
-              // Notes
               const Text(
                 'Additional Notes (Optional)',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -117,14 +120,43 @@ class _BookViewingDialogState extends State<BookViewingDialog> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle booking confirmation
-                    Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Viewing booked successfully!'),
-                      ),
+                  onPressed: () async {
+                    if (selectedTime == null) {
+                      AppSnackbar.show(
+                        context,
+                        title: "Time Required",
+                        message: "Please select a time slot",
+                        type: SnackType.error,
+                      );
+                      return;
+                    }
+
+                    CustomLoading.show(context);
+                    // Sends date as YYYY-MM-DD
+                    final response = await provider.makeBookingMeeting(
+                      _formattedDate,
+                      selectedTime!.split(" ").first,
+                      notesController.text,
                     );
+                    CustomLoading.hide(context);
+
+                    if (response) {
+                      Navigator.pop(context);
+                      AppSnackbar.show(
+                        context,
+                        title: "Success",
+                        message: "Booking successful for $_formattedDate",
+                        type: SnackType.success,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                      AppSnackbar.show(
+                        context,
+                        title: "Error",
+                        message: "Booking failed",
+                        type: SnackType.error,
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1A237E),
@@ -159,54 +191,37 @@ class _BookViewingDialogState extends State<BookViewingDialog> {
       ),
       child: Column(
         children: [
-          // Month header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.chevron_left),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
+              const Icon(Icons.chevron_left, color: Colors.grey),
+              Text(
+                'March 2026',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              const Text(
-                'November 2025',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.chevron_right),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
+              const Icon(Icons.chevron_right, color: Colors.grey),
             ],
           ),
           const SizedBox(height: 16),
-
-          // Weekday headers
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
                 .map(
-                  (day) => SizedBox(
-                    width: 30,
-                    child: Center(
-                      child: Text(
-                        day,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                  (day) => Text(
+                    day,
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 )
                 .toList(),
           ),
           const SizedBox(height: 8),
-
-          // Calendar days
           _buildCalendarDays(),
         ],
       ),
@@ -214,68 +229,42 @@ class _BookViewingDialogState extends State<BookViewingDialog> {
   }
 
   Widget _buildCalendarDays() {
-    // November 2025 starts on Saturday (day 6)
-    final List<int?> days = [
-      null, null, null, null, null, null, 1, // Week 1
-      2, 3, 4, 5, 6, 7, 8, // Week 2
-      9, 10, 11, 12, 13, 14, 15, // Week 3
-      16, 17, 18, 19, 20, 21, 22, // Week 4
-      23, 24, 25, 26, 27, 28, 29, // Week 5
-      30, 1, 2, 3, 4, 5, 6, // Week 6
-    ];
+    // March 2026 starts on a Sunday (index 0)
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7,
+      ),
+      itemCount: 31,
+      itemBuilder: (context, index) {
+        final day = index + 1;
+        final isSelected = selectedDate.day == day && selectedDate.month == 3;
 
-    return Column(
-      children: List.generate(6, (weekIndex) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(7, (dayIndex) {
-              final index = weekIndex * 7 + dayIndex;
-              final day = days[index];
-              final isCurrentMonth = day != null && day <= 30;
-              final isSelected = isCurrentMonth && day == 3;
-
-              return Flexible(
-                child: GestureDetector(
-                  onTap: isCurrentMonth
-                      ? () {
-                          setState(() {
-                            selectedDate = DateTime(2025, 11, day);
-                          });
-                        }
-                      : null,
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFF1A237E)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child: Text(
-                        day?.toString() ?? '',
-                        style: TextStyle(
-                          color: isSelected
-                              ? Colors.white
-                              : isCurrentMonth
-                              ? Colors.black
-                              : Colors.grey[300],
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                  ),
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedDate = DateTime(2026, 3, day);
+            });
+          },
+          child: Container(
+            margin: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF1A237E) : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                day.toString(),
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
-              );
-            }),
+              ),
+            ),
           ),
         );
-      }),
+      },
     );
   }
 
@@ -286,11 +275,7 @@ class _BookViewingDialogState extends State<BookViewingDialog> {
       children: timeSlots.map((time) {
         final isSelected = selectedTime == time;
         return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedTime = time;
-            });
-          },
+          onTap: () => setState(() => selectedTime = time),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(

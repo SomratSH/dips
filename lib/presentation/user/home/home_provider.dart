@@ -1,4 +1,5 @@
 import 'package:dips/components/custom_snackbar.dart';
+import 'package:dips/data/model/favourite_json.dart';
 import 'package:dips/data/model/property_details_json.dart';
 import 'package:dips/domain/entity/property_model.dart';
 import 'package:dips/domain/entity/property_type_model.dart';
@@ -98,6 +99,95 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     } else {
       similerPropertyList = [];
+      notifyListeners();
+    }
+  }
+
+  Future<bool> makeOffer(
+    String name,
+    String email,
+    String offerAmount,
+    String phone,
+    String message,
+  ) async {
+    final response = await _homeRepository.makeOffer({
+      "buyer_name": name,
+      "email": email,
+      "phone": phone,
+      "property": propertyDetailsJson.id!,
+      "offer_amount": offerAmount,
+      "message": message,
+    });
+    return response;
+  }
+
+  Future<bool> makeBookingMeeting(
+    String date,
+    String timeSlot,
+
+    String message,
+  ) async {
+    final response = await _homeRepository.makeMeeting({
+      "property": propertyDetailsJson.id,
+      "date": date,
+      "time_slot": timeSlot,
+      "message": message,
+    });
+    return response;
+  }
+
+  Future<bool> giveRating(int selectedRating) async {
+    final response = await _homeRepository.giveRating(
+      selectedRating,
+      propertyDetailsJson.agent!.id!,
+    );
+    return response;
+  }
+
+  List<PropertyModel> searchFilterList = [];
+  Future<void> searchFilter(
+    String serach,
+    String propertyType,
+    String minPrice,
+    String maxPrice,
+    String bed,
+    String amenities,
+  ) async {
+    isLoading = true;
+    notifyListeners();
+    final response = await _homeRepository.searchFilter(
+      serach,
+      propertyType,
+      minPrice,
+      maxPrice,
+      bed,
+      amenities,
+    );
+    if (response.isNotEmpty) {
+      searchFilterList = response;
+      print(searchFilterList.length);
+      isLoading = false;
+      notifyListeners();
+    } else {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<FavouriteJson> favouriteList = [];
+
+  Future<void> getFavourite() async {
+    isLoading = true;
+    notifyListeners();
+    final response = await _homeRepository.getFavourite();
+
+    if (response.isNotEmpty) {
+      favouriteList = response;
+      isLoading = false;
+
+      notifyListeners();
+    } else {
+      isLoading = false;
       notifyListeners();
     }
   }

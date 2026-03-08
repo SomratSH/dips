@@ -43,4 +43,30 @@ class ContactActions {
       await launchUrl(whatsappUri, mode: LaunchMode.platformDefault);
     }
   }
+  static Future<void> sendMail({
+    required String email,
+    String subject = '',
+    String body = '',
+  }) async {
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: _encodeQueryParameters({
+        'subject': subject,
+        'body': body,
+      }),
+    );
+
+    if (await canLaunchUrl(emailLaunchUri)) {
+      await launchUrl(emailLaunchUri);
+    } else {
+      throw Exception('Could not launch email client');
+    }
+  }
+  static String? _encodeQueryParameters(Map<String, String> params) {
+    return params.entries
+        .map((MapEntry<String, String> e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
 }

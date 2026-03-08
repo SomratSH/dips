@@ -3,7 +3,6 @@ import 'package:dips/presentation/chatbot/chatbot_provider.dart';
 import 'package:dips/presentation/user/home/home_provider.dart';
 import 'package:dips/presentation/user/profile/profile_provider.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -19,7 +18,8 @@ class AppProvider {
     ChangeNotifierProvider(
       create: (_) => HomeProvider(getIt())
         ..getPropertyType()
-        ..getPropertyList(),
+        ..getPropertyList()
+        ..getFavourite(),
     ),
   ];
 }
