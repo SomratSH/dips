@@ -1,4 +1,5 @@
 import 'package:dips/components/custom_button.dart';
+import 'package:dips/components/custom_loading_dialog.dart';
 import 'package:dips/components/custom_padding.dart';
 import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/components/custom_text_field.dart';
@@ -165,6 +166,7 @@ class _SingupAgentScreenState extends State<SingupAgentScreen> {
                             passwordController.text.isNotEmpty &&
                             emailController.text.isNotEmpty &&
                             brandController.text.isNotEmpty) {
+                               CustomLoading.show(context);
                           final response = await provider.signUpAgent(
                             fullName: nameController.text,
                             brandName: brandController.text,
@@ -175,7 +177,9 @@ class _SingupAgentScreenState extends State<SingupAgentScreen> {
                           );
 
                           if (response) {
+                            
                             if (context.mounted) {
+                               CustomLoading.hide(context);
                               context.go(RoutePath.login);
                             }
                           }

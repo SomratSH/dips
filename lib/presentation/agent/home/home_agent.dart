@@ -1,10 +1,12 @@
 import 'package:dips/components/custom_padding.dart';
 import 'package:dips/core/routing/route_path.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:dips/presentation/agent/home/widget/recent_activity.dart';
 import 'package:dips/presentation/agent/home/widget/status_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 
 
@@ -13,10 +15,11 @@ class HomeAgent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
+          child: provider.isLoading ? Center(child: CircularProgressIndicator(),) : Column(
             children: [
               buildHeader(context),
               Padding(
@@ -26,7 +29,7 @@ class HomeAgent extends StatelessWidget {
                     Expanded(
                       child: StatsCard(
                         title: '🏠 Listings',
-                        value: '24',
+                        value: provider.agentDashboardModel.totalPropertyListing!.toString(),
                         percentage: '+13%',
                         iconPath: 'assets/icons/agentHOme.svg',
                         onTap: () {
@@ -38,7 +41,7 @@ class HomeAgent extends StatelessWidget {
                     Expanded(
                       child: StatsCard(
                         title: '👁 Views',
-                        value: '1,342',
+                        value: provider.agentDashboardModel.totalPropertyViews.toString(),
                         percentage: '+28%',
                         iconPath: 'assets/icons/eye.svg',
                         onTap: () {
@@ -56,7 +59,7 @@ class HomeAgent extends StatelessWidget {
                     Expanded(
                       child: StatsCard(
                         title: '💬 Offers',
-                        value: '18',
+                        value: provider.agentDashboardModel.totalOffersReceived.toString(),
                         percentage: '+5%',
                         iconPath: 'assets/icons/offer_icon.svg',
                         onTap: () {
@@ -68,7 +71,7 @@ class HomeAgent extends StatelessWidget {
                     Expanded(
                       child: StatsCard(
                         title: '📱 QR Scans',
-                        value: '180',
+                        value: provider.agentDashboardModel.totalQrScanned.toString(),
                         percentage: '+42%',
                         iconPath: 'assets/icons/scan_icon.svg',
                         onTap: () {
@@ -84,7 +87,7 @@ class HomeAgent extends StatelessWidget {
                 child: RecentActivityCard(),
               ),
             ],
-          ),
+          ) ,
         ),
       ),
       floatingActionButton: FloatingActionButton(

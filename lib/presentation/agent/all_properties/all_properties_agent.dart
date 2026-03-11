@@ -1,11 +1,14 @@
+import 'package:dips/domain/entity/property_model.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AllPropertiesAgent extends StatelessWidget {
   const AllPropertiesAgent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final properties = _sampleProperties;
+    final provider = context.watch<HomeAgentProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -20,12 +23,16 @@ class AllPropertiesAgent extends StatelessWidget {
           const SizedBox(height: 12),
           _buildFilterChips(),
           const SizedBox(height: 12),
-          Expanded(
+        provider.isLoading  ? Center(
+          child: CircularProgressIndicator()
+        ) : provider.propertyList.isEmpty ? Center(
+          child: Text("No data")
+        )  : Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: properties.length,
+              itemCount: provider.propertyList.length,
               itemBuilder: (context, index) {
-                final p = properties[index];
+                final p = provider.propertyList[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 14),
                   child: PropertyCard(property: p),
@@ -72,84 +79,88 @@ class AllPropertiesAgent extends StatelessWidget {
   }
 }
 
-class Property {
-  final String title;
-  final String price;
-  final String address;
-  final int beds;
-  final int baths;
-  final String area;
-  final String imageUrl;
-  final String status;
-  final int views;
-  final int scans;
+// class Property {
+//   final String title;
+//   final String price;
+//   final String address;
+//   final int beds;
+//   final int baths;
+//   final String area;
+//   final String imageUrl;
+//   final String status;
+//   final int views;
+//   final int scans;
 
-  Property({
-    required this.title,
-    required this.price,
-    required this.address,
-    required this.beds,
-    required this.baths,
-    required this.area,
-    required this.imageUrl,
-    required this.status,
-    required this.views,
-    required this.scans,
-  });
-}
+//   Property({
+//     required this.title,
+//     required this.price,
+//     required this.address,
+//     required this.beds,
+//     required this.baths,
+//     required this.area,
+//     required this.imageUrl,
+//     required this.status,
+//     required this.views,
+//     required this.scans,
+//   });
+// }
 
-final List<Property> _sampleProperties = [
-  Property(
-    title: 'Modern 3-Bed Appartment',
-    price: '£850,000',
-    address: '123 Main Street, Los Angeles',
-    beds: 2,
-    baths: 2,
-    area: '950 sqft',
-    imageUrl:
-        'https://thumbs.dreamstime.com/b/modern-apartment-interior-grey-sofa-footstool-armcha-armchair-wooden-floor-tv-colorful-graphic-photo-concept-122713421.jpg',
-    status: 'Active',
-    views: 342,
-    scans: 28,
-  ),
-  Property(
-    title: 'Modern 3-Bed Appartment',
-    price: '£850,000',
-    address: '123 Main Street, Los Angeles',
-    beds: 2,
-    baths: 2,
-    area: '950 sqft',
-    imageUrl:
-        'https://cf.bstatic.com/xdata/images/hotel/max1024x768/542608327.jpg?k=281c15e9f915014269a9f2bfc531bb2e5e847de13edb47731bce3e10f0675c3a&o=',
-    status: 'Sold',
-    views: 342,
-    scans: 28,
-  ),
-  Property(
-    title: 'Modern 3-Bed Appartment',
-    price: '£850,000',
-    address: '123 Main Street, Los Angeles',
-    beds: 2,
-    baths: 2,
-    area: '950 sqft',
-    imageUrl:
-        'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXBhcnRtZW50fGVufDB8fDB8fHww',
-    status: 'Pending',
-    views: 342,
-    scans: 28,
-  ),
-];
+
+
+// final List<Property> _sampleProperties = [
+//   Property(
+//     title: 'Modern 3-Bed Appartment',
+//     price: '£850,000',
+//     address: '123 Main Street, Los Angeles',
+//     beds: 2,
+//     baths: 2,
+//     area: '950 sqft',
+//     imageUrl:
+//         'https://thumbs.dreamstime.com/b/modern-apartment-interior-grey-sofa-footstool-armcha-armchair-wooden-floor-tv-colorful-graphic-photo-concept-122713421.jpg',
+//     status: 'Active',
+//     views: 342,
+//     scans: 28,
+//   ),
+//   Property(
+//     title: 'Modern 3-Bed Appartment',
+//     price: '£850,000',
+//     address: '123 Main Street, Los Angeles',
+//     beds: 2,
+//     baths: 2,
+//     area: '950 sqft',
+//     imageUrl:
+//         'https://cf.bstatic.com/xdata/images/hotel/max1024x768/542608327.jpg?k=281c15e9f915014269a9f2bfc531bb2e5e847de13edb47731bce3e10f0675c3a&o=',
+//     status: 'Sold',
+//     views: 342,
+//     scans: 28,
+//   ),
+//   Property(
+//     title: 'Modern 3-Bed Appartment',
+//     price: '£850,000',
+//     address: '123 Main Street, Los Angeles',
+//     beds: 2,
+//     baths: 2,
+//     area: '950 sqft',
+//     imageUrl:
+//         'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXBhcnRtZW50fGVufDB8fDB8fHww',
+//     status: 'Pending',
+//     views: 342,
+//     scans: 28,
+//   ),
+// ];
+
+
 
 class PropertyCard extends StatelessWidget {
-  final Property property;
+  final PropertyModel property;
 
   const PropertyCard({super.key, required this.property});
 
   Color _statusColor(String s) {
     switch (s.toLowerCase()) {
-      case 'active':
+      case 'new':
         return Colors.green.shade600;
-      case 'sold':
+      case 'feature':
         return Colors.red.shade600;
       case 'pending':
         return Colors.blue.shade600;
@@ -181,7 +192,8 @@ class PropertyCard extends StatelessWidget {
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
                     child: Image.network(
-                      property.imageUrl,
+                      property.image == "" ?
+                      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800" : property.image,
                       fit: BoxFit.cover,
                       errorBuilder: (c, e, s) =>
                           Container(color: Colors.grey[300]),
@@ -197,11 +209,21 @@ class PropertyCard extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: _statusColor(property.status),
+                      color: _statusColor(  property.isNew!
+                                ? "New"
+                                : property!
+                                      .isFeature!
+                                ? "Feature"
+                                : "N/A",),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      property.status,
+                      property.isNew!
+                                ? "New"
+                                : property!
+                                      .isFeature!
+                                ? "Feature"
+                                : "N/A",
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -234,7 +256,7 @@ class PropertyCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    property.title,
+                    property.name,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -242,7 +264,7 @@ class PropertyCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    property.price,
+                    property.price.toString(),
                     style: const TextStyle(
                       fontSize: 18,
                       color: Colors.red,
@@ -260,7 +282,7 @@ class PropertyCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          property.address,
+                          property.location,
                           style: TextStyle(color: Colors.grey[700]),
                         ),
                       ),
@@ -269,11 +291,11 @@ class PropertyCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      _iconText(Icons.king_bed, '${property.beds} Beds'),
+                      _iconText(Icons.king_bed, '${property.bed} Beds'),
                       const SizedBox(width: 12),
                       _iconText(Icons.bathtub, '${property.baths} Baths'),
                       const SizedBox(width: 12),
-                      _iconText(Icons.square_foot, property.area),
+                      _iconText(Icons.square_foot, property.size.toString()),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -287,27 +309,23 @@ class PropertyCard extends StatelessWidget {
                             size: 16,
                             color: Colors.grey,
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${property.views}',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
+                          
                         ],
                       ),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.qr_code_scanner,
-                            size: 16,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '${property.scans} scans',
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     const Icon(
+                      //       Icons.qr_code_scanner,
+                      //       size: 16,
+                      //       color: Colors.grey,
+                      //     ),
+                      //     const SizedBox(width: 6),
+                      //     Text(
+                      //       '${property.scans} scans',
+                      //       style: TextStyle(color: Colors.grey[700]),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ],

@@ -1,5 +1,7 @@
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:dips/presentation/agent/home/widget/activity_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 class RecentActivityCard extends StatelessWidget {
@@ -7,6 +9,7 @@ class RecentActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: ShapeDecoration(
@@ -29,43 +32,33 @@ class RecentActivityCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children:  [
           Text(
             "Recent Activity",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 12),
 
-          ActivityItem(
+       provider.agentDashboardModel.recentActivity!.isEmpty ? Center(
+        child: Text("No acitvity available")
+       ) : Column(
+          children: List.generate(provider.agentDashboardModel.recentActivity!.length, (index) {
+            final data = provider.agentDashboardModel.recentActivity![index];
+            return Column(
+              children: [
+                 ActivityItem(
             color: Colors.green,
-            title: "Modern Villa Downtown",
-            subtitle: "New offer received",
-            time: "2 hours ago",
+            title: data.propertyName!,
+            subtitle: data.activity!,
+            time: data.time!,
           ),
           Divider(),
+              ],
+            );
+          }),
+        )
 
-          ActivityItem(
-            color: Colors.blue,
-            title: "Cozy Beach House",
-            subtitle: "QR code scanned",
-            time: "4 hours ago",
-          ),
-          Divider(),
-
-          ActivityItem(
-            color: Colors.purple,
-            title: "Luxury Penthouse",
-            subtitle: "12 new views",
-            time: "5 hours ago",
-          ),
-          Divider(),
-
-          ActivityItem(
-            color: Colors.orange,
-            title: "Family Home Suburbia",
-            subtitle: "Lead inquiry",
-            time: "1 day ago",
-          ),
+         
         ],
       ),
     );

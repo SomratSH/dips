@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:dips/components/custom_button.dart';
+import 'package:dips/components/custom_loading_dialog.dart';
 import 'package:dips/components/custom_padding.dart';
 import 'package:dips/components/custom_text_field.dart';
 import 'package:dips/core/routing/route_path.dart';
@@ -225,6 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CustomPadding().vPad10,
                         CustomButton(
                           onPressed: () async {
+                            CustomLoading.show(context);
                             if (!isUserSelected) {
                               final data = await provider.login(
                                 isUser: !isUserSelected,
@@ -234,6 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                               if (data) {
                                 if (context.mounted) {
+                                  CustomLoading.hide(context);
                                   context.go(RoutePath.homeAgent);
                                 }
                               }
@@ -245,6 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 context: context,
                               );
                               if (data) {
+                                 CustomLoading.hide(context);
                                 if (context.mounted) {
                                   context.go(RoutePath.home);
                                 }

@@ -77,16 +77,16 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
     super.dispose();
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
+    @override
+    void initState() {
+      // TODO: implement initState
+      super.initState();
 
-    final v = context.read<ProfileProvider>();
+      final v = context.read<ProfileProvider>();
 
-    _fullNameController = TextEditingController(text: v.profileModel.name);
-    _phoneController = TextEditingController(text: v.profileModel.phone);
-  }
+      _fullNameController = TextEditingController(text: v.profileModel.name);
+      _phoneController = TextEditingController(text: v.profileModel.phone);
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -451,7 +451,7 @@ class _EditAccountScreenState extends State<EditAccountScreen> {
                     image: provider.selectedImage != null
                         ? FileImage(provider.selectedImage!)
                         : NetworkImage(
-                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+                           provider.profileModel.profilePicture != null ?  provider.profileModel.profilePicture! :  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
                           ),
                     fit: BoxFit.cover,
                   ),

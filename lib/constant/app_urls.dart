@@ -41,6 +41,17 @@ class AppUrls {
   static String bookingMeeting = "/user/bookings/";
   static String giveRating = "/user/properties/agent/";
   static String searchFilter = "/user/properties/";
-
   static String favourite = "/user/properties/favourites/";
+
+
+  //agent portion
+  static String agentDashboard = "/agent/properties/dashboard/";
+
+  static String getPropertyAgent = "/agent/properties/";
+
+  static String agentProfile = "/agent/auth/profile/";
+
+  static String updateAgentProfile = "/agent/auth/profile/";
+
+  static String addProperty = "";
 }

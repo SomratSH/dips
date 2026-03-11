@@ -1,7 +1,13 @@
+import 'package:dips/components/custom_loading_dialog.dart';
 import 'package:dips/components/custom_padding.dart';
+import 'package:dips/components/custom_snackbar.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
+import 'package:dips/presentation/user/home/home_provider.dart';
+import 'package:dips/presentation/user/profile/edit_account_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class EditAgentProfile extends StatefulWidget {
   const EditAgentProfile({Key? key}) : super(key: key);
@@ -11,10 +17,12 @@ class EditAgentProfile extends StatefulWidget {
 }
 
 class _EditAgentProfileState extends State<EditAgentProfile> {
-  final _fullNameController = TextEditingController(text: 'Brooklyn Simmons');
-  final _phoneController = TextEditingController(text: '+1 234 567 8900');
-  final _emailController = TextEditingController(text: 'brooklyn@example.com');
-  final _locationController = TextEditingController(text: 'New York, USA');
+  TextEditingController _fullNameController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+
+  TextEditingController _brandController = TextEditingController();
+  TextEditingController _websiteController = TextEditingController();
 
   bool _isProfileTab = true;
 
@@ -71,11 +79,32 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    final v = context.read<HomeAgentProvider>();
+    _fullNameController = TextEditingController(
+      text: v.agentProfileModel.fullName,
+    );
+    _phoneController = TextEditingController(text: v.agentProfileModel.phone);
+    _emailController = TextEditingController(text: v.agentProfileModel.email);
+
+    _brandController = TextEditingController(
+      text: v.agentProfileModel.agentProfile!.brandName!,
+    );
+
+    _websiteController = TextEditingController(
+      text: v.agentProfileModel.agentProfile!.website!,
+    );
+  }
+
+  @override
   void dispose() {
     _fullNameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
-    _locationController.dispose();
+
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
@@ -84,6 +113,7 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
@@ -105,12 +135,12 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
                     ? Column(
                         children: [
                           const SizedBox(height: 24),
-                          _buildBandingHeader(),
+                          _buildBandingHeader(provider),
                           const SizedBox(height: 24),
-                          _buildProfileHeader(),
+                          _buildProfileHeader(provider),
 
                           const SizedBox(height: 24),
-                          _buildButtons(),
+                          _buildButtons(provider),
                           const SizedBox(height: 32),
                         ],
                       )
@@ -415,7 +445,7 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
     );
   }
 
-  Widget _buildBandingHeader() {
+  Widget _buildBandingHeader(HomeAgentProvider provider) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -467,48 +497,59 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
 
           Row(
             children: [
-              CircleAvatar(child: Image.asset("assets/image/Text.png")),
+              CircleAvatar(
+                child: provider.selectedLogo != null
+                    ? Image.file(provider.selectedLogo!)
+                    : provider.agentProfileModel.agentProfile!.logo != null
+                    ? Image.network(
+                        provider.agentProfileModel.agentProfile!.logo!,
+                      )
+                    : Image.asset("assets/image/Text.png"),
+              ),
               CustomPadding().hPad10,
-              DecoratedBox(
-                decoration: ShapeDecoration(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                      width: 1.11,
-                      color: Colors.black.withValues(alpha: 0.10),
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-
-                child: Row(
-                  children: [
-                    Icon(Icons.file_upload_outlined),
-                    CustomPadding().hPad5,
-                    Text(
-                      'Upload New Logo',
-                      style: TextStyle(
-                        color: const Color(0xFF0A0A0A),
-                        fontSize: 12,
-                        fontFamily: 'Lato',
-                        fontWeight: FontWeight.w400,
+              InkWell(
+                onTap: () => showImagePickerBottomSheetV(context),
+                child: DecoratedBox(
+                  decoration: ShapeDecoration(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        width: 1.11,
+                        color: Colors.black.withValues(alpha: 0.10),
                       ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                  ),
+
+                  child: Row(
+                    children: [
+                      Icon(Icons.file_upload_outlined),
+                      CustomPadding().hPad5,
+                      Text(
+                        'Upload New Logo',
+                        style: TextStyle(
+                          color: const Color(0xFF0A0A0A),
+                          fontSize: 12,
+                          fontFamily: 'Lato',
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           _buildTextField(
-            controller: _fullNameController,
+            controller: _brandController,
             icon: Icons.person_outline,
             label: 'Company Name',
             iconColor: const Color(0xFFEF4444),
           ),
           const SizedBox(height: 16),
           _buildTextField(
-            controller: _phoneController,
+            controller: _websiteController,
             icon: Icons.phone_outlined,
             label: 'Website',
             iconColor: const Color(0xFFEF4444),
@@ -519,7 +560,7 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(HomeAgentProvider provider) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -578,25 +619,38 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.grey[300],
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
-                    ),
+                  image: DecorationImage(
+                    image: provider.selectedImage != null
+                        ? FileImage(provider.selectedImage!)
+                        : provider.agentProfileModel.profilePicture != null
+                        ? NetworkImage(
+                            "https://scan2home.selimreza.dev" +  provider.agentProfileModel.profilePicture!,
+                          )
+                        : NetworkImage(
+                            'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200',
+                          ),
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1F2937),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
+              InkWell(
+                onTap: () => showImagePickerBottomSheet(context),
+                child: Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1F2937),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                    child: const Icon(
+                      Icons.edit,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
-                  child: const Icon(Icons.edit, size: 16, color: Colors.white),
                 ),
               ),
             ],
@@ -668,13 +722,6 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
             iconColor: const Color(0xFFEF4444),
             keyboardType: TextInputType.emailAddress,
           ),
-          const SizedBox(height: 16),
-          _buildTextField(
-            controller: _locationController,
-            icon: Icons.location_on_outlined,
-            label: 'Location',
-            iconColor: const Color(0xFFEF4444),
-          ),
         ],
       ),
     );
@@ -729,20 +776,30 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
     );
   }
 
-  Widget _buildButtons() {
+  Widget _buildButtons(HomeAgentProvider proivder) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
           Expanded(
             child: ElevatedButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Changes saved successfully!'),
-                    backgroundColor: Color(0xFF10B981),
-                  ),
-                );
+              onPressed: () async{
+                 CustomLoading.show(context);
+
+                final response = await proivder.updateAgentProfile({
+                  "full_name" : _fullNameController.text,
+                  "phone" : _phoneController.text,
+                  "agent_profile": {"brand_name": _brandController.text, "website" : _websiteController.text},
+                });
+
+                if(response){
+                  CustomLoading.hide(context);
+                  AppSnackbar.show(context, title: "Profile Update", message:"Profile Update Successfully",type: SnackType.success);
+                }else{
+                      CustomLoading.hide(context);
+                  AppSnackbar.show(context, title: "Profile Update", message:"Profile Update Not Successfully", type: SnackType.error);
+                }
+                
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1F2937),
@@ -765,18 +822,10 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
           const SizedBox(width: 12),
           Expanded(
             child: OutlinedButton(
-              onPressed: () {
-                _fullNameController.text = 'Brooklyn Simmons';
-                _phoneController.text = '+1 234 567 8900';
-                _emailController.text = 'brooklyn@example.com';
-                _locationController.text = 'New York, USA';
+              onPressed: () async {
+               
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Changes cancelled'),
-                    backgroundColor: Colors.grey,
-                  ),
-                );
+               context.pop();
               },
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -797,6 +846,122 @@ class _EditAgentProfileState extends State<EditAgentProfile> {
           ),
         ],
       ),
+    );
+  }
+
+  void showImagePickerBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                /// Gallery
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.read<HomeAgentProvider>().pickFromGallery();
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircleAvatar(
+                        radius: 30,
+                        child: Icon(Icons.photo, size: 28),
+                      ),
+                      SizedBox(height: 8),
+                      Text("Gallery"),
+                    ],
+                  ),
+                ),
+
+                /// Camera
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.read<HomeAgentProvider>().pickFromCamera();
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircleAvatar(
+                        radius: 30,
+                        child: Icon(Icons.camera_alt, size: 28),
+                      ),
+                      SizedBox(height: 8),
+                      Text("Camera"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showImagePickerBottomSheetV(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                /// Gallery
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.read<HomeAgentProvider>().pickFromGalleryv();
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircleAvatar(
+                        radius: 30,
+                        child: Icon(Icons.photo, size: 28),
+                      ),
+                      SizedBox(height: 8),
+                      Text("Gallery"),
+                    ],
+                  ),
+                ),
+
+                /// Camera
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                    context.read<HomeAgentProvider>().pickFromCamerav();
+                  },
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      CircleAvatar(
+                        radius: 30,
+                        child: Icon(Icons.camera_alt, size: 28),
+                      ),
+                      SizedBox(height: 8),
+                      Text("Camera"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

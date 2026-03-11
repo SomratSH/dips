@@ -1,3 +1,4 @@
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:dips/presentation/authentication/authentication_provider.dart';
 import 'package:dips/presentation/chatbot/chatbot_provider.dart';
 import 'package:dips/presentation/user/home/home_provider.dart';
@@ -21,5 +22,8 @@ class AppProvider {
         ..getPropertyList()
         ..getFavourite(),
     ),
+
+    //agent
+      ChangeNotifierProvider(create: (_) => HomeAgentProvider(getIt())..getDashboard()..getPropertyList()..getAgentProfile()),
   ];
 }

@@ -1,6 +1,8 @@
 import 'package:dips/components/custom_padding.dart';
 import 'package:dips/core/routing/route_path.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:dips/presentation/authentication/authentication_provider.dart';
+import 'package:dips/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -22,87 +24,93 @@ class _ProfileAgentState extends State<ProfileAgent> {
   @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthenticationProvider>();
+    final provider = context.watch<HomeAgentProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
 
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Text(
-                'Account Settings',
-                style: TextStyle(
-                  color: const Color(0xFF041E41),
-                  fontSize: 16,
-                  fontFamily: 'Lato',
-                  fontWeight: FontWeight.w700,
+        child: RefreshIndicator(
+          onRefresh: ()async{
+            await provider.getAgentProfile();
+          },
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text(
+                  'Account Settings',
+                  style: TextStyle(
+                    color: const Color(0xFF041E41),
+                    fontSize: 16,
+                    fontFamily: 'Lato',
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              _buildHeader(),
-              _buildPropertyStats(),
-              const SizedBox(height: 16),
-              _buildMenuList(),
-
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: InkWell(
-                  onTap: () => showDeleteAccountDialog(context),
-                  child: DecoratedBox(
-                    decoration: ShapeDecoration(
-                      color: const Color(0x26FB1C1F),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      shadows: [
-                        BoxShadow(
-                          color: Color(0x14000000),
-                          blurRadius: 28.24,
-                          offset: Offset(0, 5.65),
-                          spreadRadius: 0,
+                _buildHeader(provider),
+                _buildPropertyStats(provider),
+                const SizedBox(height: 16),
+                _buildMenuList(),
+          
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: InkWell(
+                    onTap: () => showDeleteAccountDialog(context),
+                    child: DecoratedBox(
+                      decoration: ShapeDecoration(
+                        color: const Color(0x26FB1C1F),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.delete_outline,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          CustomPadding().hPad10,
-                          Text(
-                            'Delete My Account',
-                            style: TextStyle(
-                              color: const Color(0xFFE63946),
-                              fontSize: 16,
-                              fontFamily: 'Lato',
-                              fontWeight: FontWeight.w400,
-                            ),
+                        shadows: [
+                          BoxShadow(
+                            color: Color(0x14000000),
+                            blurRadius: 28.24,
+                            offset: Offset(0, 5.65),
+                            spreadRadius: 0,
                           ),
                         ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.delete_outline,
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            CustomPadding().hPad10,
+                            Text(
+                              'Delete My Account',
+                              style: TextStyle(
+                                color: const Color(0xFFE63946),
+                                fontSize: 16,
+                                fontFamily: 'Lato',
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              _buildPreferences(),
-              const SizedBox(height: 16),
-              _buildSecurity(),
-              const SizedBox(height: 16),
-              _buildLogoutButton(() {
-                showLogoutAccountDialog(context, authProvider);
-              }),
-              const SizedBox(height: 80),
-            ],
+                _buildPreferences(),
+                const SizedBox(height: 16),
+                _buildSecurity(),
+                const SizedBox(height: 16),
+                _buildLogoutButton(() {
+                  showLogoutAccountDialog(context, authProvider);
+                }),
+                const SizedBox(height: 80),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(HomeAgentProvider provider) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
@@ -129,7 +137,7 @@ class _ProfileAgentState extends State<ProfileAgent> {
                 CircleAvatar(
                   radius: 50,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage: const AssetImage('assets/image/Text.png'),
+                  backgroundImage: provider.agentProfileModel.agentProfile!.logo != null ? NetworkImage(provider.agentProfileModel.agentProfile!.logo!) : const AssetImage('assets/image/Text.png'),
                 ),
                 Positioned(
                   bottom: 0,
@@ -154,8 +162,8 @@ class _ProfileAgentState extends State<ProfileAgent> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Premium Holdings ',
+                 Text(
+                 provider.agentProfileModel.agentProfile!.brandName!,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -163,21 +171,21 @@ class _ProfileAgentState extends State<ProfileAgent> {
                   ),
                 ),
                 CustomPadding().hPad5,
-                SvgPicture.asset("assets/icons/verified.svg"),
+                provider.agentProfileModel.agentProfile!.isVerified! ?  SvgPicture.asset("assets/icons/verified.svg") : SizedBox(),
               ],
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Premiumholdings.com',
+             Text(
+             provider.agentProfileModel.agentProfile!.website ?? "N/A",
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Member since Sept 2025',
+             Text(
+              'Member since ${formatMonthYear(provider.agentProfileModel.memberSince!)}',
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
             CustomPadding().vPad15,
-            DecoratedBox(
+           provider.agentProfileModel.agentProfile!.isVerified! ?    DecoratedBox(
               decoration: ShapeDecoration(
                 color: const Color(0xFFDBEAFE),
                 shape: RoundedRectangleBorder(
@@ -203,14 +211,14 @@ class _ProfileAgentState extends State<ProfileAgent> {
                   ),
                 ),
               ),
-            ),
+            ) : SizedBox(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPropertyStats() {
+  Widget _buildPropertyStats(HomeAgentProvider provider) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -219,7 +227,7 @@ class _ProfileAgentState extends State<ProfileAgent> {
             child: _buildStatCard(
               icon: Icons.bookmark_border,
               title: 'Offers Received',
-              value: '12',
+              value: provider.agentDashboardModel.totalOffersReceived!.toString(),
               color: const Color(0xFFFEF3C7),
               iconColor: const Color(0xFFF59E0B),
               valueColor: Color(0xFFC1A45C),
@@ -234,7 +242,7 @@ class _ProfileAgentState extends State<ProfileAgent> {
               child: _buildStatCard(
                 icon: Icons.home_outlined,
                 title: 'Total Listings',
-                value: '3',
+                value: provider.agentDashboardModel.totalPropertyListing.toString(),
                 valueColor: Color(0xFF0D4428),
                 color: const Color(0xFFDCFCE7),
                 iconColor: const Color(0xFF10B981),

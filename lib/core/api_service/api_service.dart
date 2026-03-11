@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dips/constant/app_urls.dart';
 import 'package:http/http.dart' as http;
 
-
 // Import AppUrls
 
 class ApiService {
@@ -202,13 +201,15 @@ class ApiService {
     }
   }
 
-  Future<Map<String, dynamic>> patchData(
+   Future<Map<String, dynamic>> postDataWithVideo(
     String endpoint,
     Map<String, dynamic> data, {
     Map<String, String>? queryParams,
     File? image,
-    String imageParamNam = "image",
     String? authToken,
+    String imageParamNam = "image",
+    File?  video,
+    String videoParams = ""
   }) async {
     try {
       Uri uri = Uri.parse('${AppUrls.baseUrl}$endpoint');
@@ -217,6 +218,60 @@ class ApiService {
       }
       var request;
       if (image == null) {
+        request = http.Request('POST', uri);
+
+        request.headers['Content-Type'] = 'application/json';
+        request.body = json.encode(data);
+      } else {
+        request = http.MultipartRequest('POST', uri);
+
+        data.forEach((key, value) {
+          request.fields[key] = value.toString();
+        });
+
+        var fileStream = http.MultipartFile(
+          imageParamNam,
+          image.readAsBytes().asStream(),
+          image.lengthSync(),
+          filename: image.uri.pathSegments.last,
+        );
+        request.files.add(fileStream);
+      }
+
+      if (authToken != null && authToken.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer $authToken';
+      }
+
+      final response = await request.send();
+
+      final responseBody = await http.Response.fromStream(response);
+      print("|my falut ${responseBody.body}");
+      // Return the parsed response
+      return _handleResponse(responseBody);
+    } on http.ClientException catch (e) {
+      return _handleError('Network error: ${e.message}');
+    } catch (e) {
+      return _handleError('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> patchData(
+    String endpoint,
+    Map<String, dynamic> data, {
+    Map<String, String>? queryParams,
+    File? image,
+    String imageParamNam = "image",
+    File? logo,
+    String logoParamName = "logo",
+    String? authToken,
+  }) async {
+    try {
+      Uri uri = Uri.parse('${AppUrls.baseUrl}$endpoint');
+      if (queryParams != null) {
+        uri = uri.replace(queryParameters: queryParams);
+      }
+      var request;
+      if (image == null && logo == null) {
         request = http.Request('PATCH', uri);
 
         request.headers['Content-Type'] = 'application/json';
@@ -228,13 +283,30 @@ class ApiService {
           request.fields[key] = value.toString();
         });
 
-        final imageBytes = await image.readAsBytes();
-        var multipartFile = http.MultipartFile.fromBytes(
-          imageParamNam,
-          imageBytes,
-          filename: image.uri.pathSegments.last,
-        );
-        request.files.add(multipartFile);
+        if (image != null) {
+          final imageBytes = await image!.readAsBytes();
+          var multipartFile = http.MultipartFile.fromBytes(
+            imageParamNam,
+            imageBytes,
+            filename: image.uri.pathSegments.last,
+          );
+          request.files.add(multipartFile);
+        }
+        if (logo != null) {
+          final logoBytes = await logo!.readAsBytes();
+
+          // Use the nested parameter name directly here
+          var multipartFileLogo = http.MultipartFile.fromBytes(
+            'agent_profile[logo]', // <--- This is the standard way to send nested keys
+            logoBytes,
+            filename: logo.path
+                .split('/')
+                .last, // Simple way to get the filename
+          );
+
+          // Correct way to add to the request
+          request.files.add(multipartFileLogo);
+        }
       }
 
       if (authToken != null && authToken.isNotEmpty) {

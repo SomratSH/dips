@@ -1,4 +1,5 @@
 import 'package:dips/components/custom_button.dart';
+import 'package:dips/components/custom_loading_dialog.dart';
 import 'package:dips/components/custom_padding.dart';
 import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/components/custom_text_field.dart';
@@ -158,6 +159,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             phomeController.text.isNotEmpty &&
                             passwordController.text.isNotEmpty &&
                             emailController.text.isNotEmpty) {
+                               CustomLoading.show(context);
                           final response = await provider.signUpUser(
                             fullName: nameController.text,
                             email: emailController.text,
@@ -168,6 +170,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                           if (response) {
                             if (context.mounted) {
+                               CustomLoading.hide(context);
                               context.go(RoutePath.login);
                             }
                           }
