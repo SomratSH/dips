@@ -8,8 +8,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-
-
 class HomeAgent extends StatelessWidget {
   const HomeAgent({super.key});
 
@@ -21,7 +19,7 @@ class HomeAgent extends StatelessWidget {
         child: SingleChildScrollView(
           child: provider.isLoading ? Center(child: CircularProgressIndicator(),) : Column(
             children: [
-              buildHeader(context),
+              buildHeader(context, provider),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -102,7 +100,7 @@ class HomeAgent extends StatelessWidget {
   }
 }
 
-Widget buildHeader(BuildContext context) {
+Widget buildHeader(BuildContext context, HomeAgentProvider provider) {
   return DecoratedBox(
     decoration: ShapeDecoration(
       gradient: LinearGradient(
@@ -141,7 +139,7 @@ Widget buildHeader(BuildContext context) {
                   ),
 
                   Text(
-                    "Lois Hang",
+                   provider.agentProfileModel.agentProfile!.brandName!,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,

@@ -1,6 +1,6 @@
 class AppUrls {
-  static String baseUrl = "https://scan2home.selimreza.dev/api/v1";
-  static String imageUrl = "https://scan2home.selimreza.dev";
+  static String baseUrl = "https://api.scan2home.co.uk/api/v1";
+  static String imageUrl = "https://api.scan2home.co.uk";
   //authetication
   static String login = "/user/auth/login/";
   static String loginAgent = "/agent/auth/login/";
@@ -46,12 +46,17 @@ class AppUrls {
 
   //agent portion
   static String agentDashboard = "/agent/properties/dashboard/";
-
   static String getPropertyAgent = "/agent/properties/";
-
   static String agentProfile = "/agent/auth/profile/";
-
   static String updateAgentProfile = "/agent/auth/profile/";
-
   static String addProperty = "";
+  static String getPropertyTypeAgent = "/user/properties/types/";
+  static String agentPropertySearch = "/user/properties/";
+  static String getOffer = "/agent/offers/";
+  static String offerAccept = "/agent/offers/";
+  static String markLead = "/agent/offers/";
+  static String counterOffer = "/agent/offers/";
+  static String getnotificaiton = "/agent/notifications/";
+
+  static String markAsRead = "/agent/notifications/";
 }

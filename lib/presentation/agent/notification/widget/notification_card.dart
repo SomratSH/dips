@@ -1,4 +1,7 @@
+import 'package:dips/components/custom_snackbar.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class NotificationCard extends StatelessWidget {
   final Color bgColor;
@@ -6,9 +9,15 @@ class NotificationCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final String id;
+  final bool markasread;
+  final int index;
 
   const NotificationCard({
     super.key,
+    required this.markasread,
+    required this.index,
+    required this.id,
     required this.bgColor,
     required this.iconBg,
     required this.icon,
@@ -18,6 +27,7 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -93,8 +103,16 @@ class NotificationCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              OutlinedButton(
-                onPressed: () {},
+              markasread ? Text("Mark as added") : OutlinedButton(
+                onPressed: () async{
+                    final response = await provider.markAsRead(id, index);
+
+                    if(response){
+                      AppSnackbar.show(context, title: "Mark as read", message: "Mark as read added", type: SnackType.success);
+                    }else{
+                      AppSnackbar.show(context, title: "Mark as read", message: "Mark as read not added", type: SnackType.error);
+                    }
+                },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF0B1E4A)),
                   shape: RoundedRectangleBorder(
@@ -106,10 +124,7 @@ class NotificationCard extends StatelessWidget {
                   style: TextStyle(color: Color(0xFF0B1E4A)),
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.delete_outline, color: Colors.red),
-              ),
+              
             ],
           ),
         ],

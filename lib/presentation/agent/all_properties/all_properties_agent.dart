@@ -21,7 +21,7 @@ class AllPropertiesAgent extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: 12),
-          _buildFilterChips(),
+          _buildFilterChips(provider),
           const SizedBox(height: 12),
         provider.isLoading  ? Center(
           child: CircularProgressIndicator()
@@ -45,38 +45,47 @@ class AllPropertiesAgent extends StatelessWidget {
       backgroundColor: const Color(0xFFF6F6F8),
     );
   }
+Widget _buildFilterChips(HomeAgentProvider provider) {
+  return SizedBox(
+    height: 44,
+    child: ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      scrollDirection: Axis.horizontal,
+      itemCount: provider.propertyType.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 8),
+      itemBuilder: (context, index) {
+        // Compare with provider's current index
+        final bool isSelected = provider.selectedTypeIndex == index;
 
-  Widget _buildFilterChips() {
-    final labels = ['All', 'Active', 'Most Scanned', 'Most View', 'Pending'];
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          final selected = index == 0;
-          return Chip(
+        return InkWell(
+          onTap: () async{
+            provider.setSelectedType(index);
+          await  provider.getPropertySearch(provider.propertyType[index]);
+             // Update the state on tap
+          },
+          borderRadius: BorderRadius.circular(20), // Keeps ripple effect clean
+          child: Chip(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            backgroundColor: selected ? Colors.white : Colors.white,
+            backgroundColor: isSelected ? Colors.red.shade50 : Colors.white,
             shape: StadiumBorder(
               side: BorderSide(
-                color: selected ? Colors.red.shade100 : Colors.transparent,
+                color: isSelected ? Colors.red.shade200 : Colors.grey.shade300,
+                width: 1,
               ),
             ),
             label: Text(
-              labels[index],
+              provider.propertyType[index],
               style: TextStyle(
-                color: selected ? Colors.red : Colors.grey[700],
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected ? Colors.red : Colors.grey[700],
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
               ),
             ),
-          );
-        },
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemCount: labels.length,
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
+}
 }
 
 // class Property {

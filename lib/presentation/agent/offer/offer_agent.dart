@@ -1,15 +1,20 @@
+
+
+import 'package:dips/components/custom_share.dart';
+import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/core/routing/route_path.dart';
+import 'package:dips/data/agent_model/offfer_model.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-
+import 'package:provider/provider.dart';
 
 class OfferAgent extends StatelessWidget {
   const OfferAgent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final offers = _sampleOffers;
+    final provider = context.watch<HomeAgentProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -26,17 +31,27 @@ class OfferAgent extends StatelessWidget {
           const SizedBox(height: 12),
           _buildFilterChips(),
           const SizedBox(height: 12),
-          Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: offers.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) => InkWell(
-                onTap: () => context.push(RoutePath.offerDetails),
-                child: OfferCard(offer: offers[index]),
-              ),
-            ),
-          ),
+          provider.isLoading
+              ? Center(child: CircularProgressIndicator())
+              : provider.offerModel.results!.isEmpty
+              ? Center(child: Text("No data available"))
+              : Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    itemCount: provider.offerModel.results!.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) =>
+                     
+                       OfferCard(
+                        offer: provider.offerModel.results![index],
+                        index: index,
+                      ),
+                    
+                  ),
+                ),
         ],
       ),
     );
@@ -76,55 +91,58 @@ class OfferAgent extends StatelessWidget {
   }
 }
 
-class Offer {
-  final String status; // e.g. Pending, Accepted
-  final String name;
-  final String title;
-  final String amount;
-  final String date;
-  final String message;
-  final String email;
-  final String phone;
+// class Offer {
+//   final String status; // e.g. Pending, Accepted
+//   final String name;
+//   final String title;
+//   final String amount;
+//   final String date;
+//   final String message;
+//   final String email;
+//   final String phone;
+//   final int index;
 
-  Offer({
-    required this.status,
-    required this.name,
-    required this.title,
-    required this.amount,
-    required this.date,
-    required this.message,
-    required this.email,
-    required this.phone,
-  });
-}
+//   Offer({
+//     required this.status,
+//     required this.name,
+//     required this.title,
+//     required this.amount,
+//     required this.date,
+//     required this.message,
+//     required this.email,
+//     required this.phone,
+//     required this.index
+//   });
+// }
 
-final List<Offer> _sampleOffers = [
-  Offer(
-    status: 'Pending',
-    name: 'John Doe',
-    title: 'Modern Luxury Villa',
-    amount: '£825,000',
-    date: '11/1/2024',
-    message: '"Interested in viewing this weekend"',
-    email: 'john@example.com',
-    phone: '+880 1234 567890',
-  ),
-  Offer(
-    status: 'Accepted',
-    name: 'John Doe',
-    title: 'Modern Luxury Villa',
-    amount: '£825,000',
-    date: '11/1/2024',
-    message: 'Cash buyer, ready to close quickly. Can we negotiate?',
-    email: 'john@example.com',
-    phone: '+880 1234 567890',
-  ),
-];
+// final List<Offer> _sampleOffers = [
+//   Offer(
+//     status: 'Pending',
+//     name: 'John Doe',
+//     title: 'Modern Luxury Villa',
+//     amount: '£825,000',
+//     date: '11/1/2024',
+//     message: '"Interested in viewing this weekend"',
+//     email: 'john@example.com',
+//     phone: '+880 1234 567890',
+//   ),
+//   Offer(
+//     status: 'Accepted',
+//     name: 'John Doe',
+//     title: 'Modern Luxury Villa',
+//     amount: '£825,000',
+//     date: '11/1/2024',
+//     message: 'Cash buyer, ready to close quickly. Can we negotiate?',
+//     email: 'john@example.com',
+//     phone: '+880 1234 567890',
+//   ),
+// ];
 
 class OfferCard extends StatelessWidget {
-  final Offer offer;
+  final Results offer;
+  final int index;
 
-  const OfferCard({super.key, required this.offer});
+  const OfferCard({super.key, required this.offer, required this.index});
 
   Color _statusColor(String s) {
     switch (s.toLowerCase()) {
@@ -141,6 +159,7 @@ class OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Material(
       elevation: 2,
       borderRadius: BorderRadius.circular(12),
@@ -162,11 +181,11 @@ class OfferCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: _statusColor(offer.status),
+                    color: _statusColor(offer.status!),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    offer.status,
+                    offer.status!,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -179,12 +198,12 @@ class OfferCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        offer.name,
+                        offer.buyerName!,
                         style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        offer.title,
+                        offer.propertyTitle!,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
@@ -204,7 +223,123 @@ class OfferCard extends StatelessWidget {
                   child: IconButton(
                     padding: EdgeInsets.zero,
                     icon: const Icon(Icons.more_vert, size: 20),
-                    onPressed: () {},
+                    onPressed: () async {
+                      final RenderBox button =
+                          context.findRenderObject() as RenderBox;
+                      final RenderBox overlay =
+                          Navigator.of(
+                                context,
+                              ).overlay!.context.findRenderObject()
+                              as RenderBox;
+
+                      final RelativeRect position = RelativeRect.fromRect(
+                        Rect.fromPoints(
+                          button.localToGlobal(Offset.zero, ancestor: overlay),
+                          button.localToGlobal(
+                            Offset(button.size.width, button.size.height),
+                            ancestor: overlay,
+                          ),
+                        ),
+                        Offset.zero & overlay.size,
+                      );
+
+                      final selected = await showMenu<String>(
+                        context: context,
+                        position: position,
+                        color: const Color(0xFF001A3F),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        items: [
+                          buildPopupItem(
+                            Icons.check,
+                            "Accept",
+                            Colors.green,
+                            "accept",
+                          ),
+                          const PopupMenuDivider(height: 1),
+                          buildPopupItem(
+                            Icons.close,
+                            "Reject",
+                            Colors.red,
+                            "reject",
+                          ),
+                          const PopupMenuDivider(height: 1),
+                          buildPopupItem(
+                            Icons.person_add_alt_1,
+                            "Add to Leads",
+                            Colors.white,
+                            "lead",
+                          ),
+                          const PopupMenuDivider(height: 1),
+                          buildPopupItem(
+                            Icons.currency_pound,
+                            "Counter Offer",
+                            Colors.amber,
+                            "counter",
+                          ),
+                        ],
+                      );
+
+                      // Handle action safely here
+                      if (selected == "accept") {
+                        final response = await provider.offerAccpet(
+                          offer.id!,
+                          index,
+                        );
+
+                        if (response) {
+                          AppSnackbar.show(
+                            context,
+                            title: "Offer",
+                            message: "Offer Accepted",
+                            type: SnackType.success,
+                          );
+                        }
+
+                        print("Accept clicked");
+                      } else if (selected == "reject") {
+                        final response = await provider.offerRejected(
+                          offer.id!,
+                          index,
+                        );
+
+                        if (response) {
+                          AppSnackbar.show(
+                            context,
+                            title: "Offer",
+                            message: "Offer Rejected",
+                            type: SnackType.success,
+                          );
+                        }
+                        print("Reject clicked");
+                      } else if (selected == "lead") {
+                         final response = await provider.markAsLead(
+                          offer.id!,
+                          index,
+                        );
+                        if (response) {
+                          AppSnackbar.show(
+                            context,
+                            title: "Lead",
+                            message: "Add to leads",
+                            type: SnackType.success,
+                          );
+                        }
+                        print("Add to Leads");
+                      } else if (selected == "counter") {
+                        print("Counter Offer");
+
+                        if(context.mounted){
+
+                          provider.selectedOfferV(index);
+                          context.push(RoutePath.offerDetails);
+                        }
+                        
+
+
+                      }
+                    },
                   ),
                 ),
               ],
@@ -223,7 +358,7 @@ class OfferCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        offer.amount,
+                        "£ ${offer.offerAmount!}",
                         style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.w700,
@@ -242,7 +377,7 @@ class OfferCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      offer.date,
+                      offer.createdAt!.split("T").first,
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -258,7 +393,7 @@ class OfferCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                offer.message,
+                offer.message!,
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -269,7 +404,7 @@ class OfferCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    offer.email,
+                    offer.email!,
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ),
@@ -282,7 +417,7 @@ class OfferCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    offer.phone,
+                    offer.phone!,
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
@@ -305,7 +440,9 @@ class OfferCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () async{
+                  await   ContactActions.openDialer(offer.phone!);
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -327,7 +464,9 @@ class OfferCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: ()async {
+                     await ContactActions.sendMail(email: offer.email!);
+                    },
                   ),
                 ),
               ],
@@ -337,4 +476,29 @@ class OfferCard extends StatelessWidget {
       ),
     );
   }
+}
+
+PopupMenuItem<String> buildPopupItem(
+  IconData icon,
+  String title,
+  Color color,
+  String value,
+) {
+  return PopupMenuItem<String>(
+    value: value,
+    child: Row(
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(width: 12),
+        Text(
+          title,
+          style: TextStyle(
+            color: color,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    ),
+  );
 }

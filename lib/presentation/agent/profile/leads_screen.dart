@@ -1,11 +1,15 @@
+import 'package:dips/components/custom_share.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class LeadsScreen extends StatelessWidget {
   const LeadsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
@@ -26,40 +30,33 @@ class LeadsScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: ListView(
+      body: provider.isLoading ? Center(child: CircularProgressIndicator(),) : provider.leadList.isEmpty ? Center(child: Text("No leads available"),)  : ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
-          LeadCard(
+        children: List.generate(provider.leadList.length, (index){
+          final data = provider.leadList[index];
+          return  LeadCard(
             status: "New",
             statusColor: Colors.green,
-            name: "John Doe",
-            property: "Modern Luxury Villa",
+            name: data.buyerName!,
+            property: data.propertyTitle!,
             label1: "Offer Amount",
-            value1: "£825,000",
+            value1: "£${data.offerAmount}",
             label2: "Date",
-            value2: "11/1/2024",
-            note: "Interested in viewing this weekend",
-          ),
-          SizedBox(height: 16),
-          LeadCard(
-            status: "Scheduled",
-            statusColor: Colors.redAccent,
-            name: "John Doe",
-            property: "Modern Luxury Villa",
-            label1: "Schedule Request",
-            value1: "11/1/2024",
-            label2: "Time",
-            value2: "10:15 AM",
-            note: "Interested for meeting",
-          ),
-        ],
+            value2: data.createdAt!.split("T").first,
+            note: data.message!,
+            email: data.email!,
+            phone: data.phone!,
+          
+
+          );
+        }),
       ),
     );
   }
 }
 
 class LeadCard extends StatelessWidget {
-  final String status, name, property, label1, value1, label2, value2, note;
+  final String status, name, property, label1, value1, label2, value2, note, email, phone;
   final Color statusColor;
 
   const LeadCard({
@@ -73,6 +70,8 @@ class LeadCard extends StatelessWidget {
     required this.label2,
     required this.value2,
     required this.note,
+    required this.email, 
+    required this.phone
   });
 
   @override
@@ -93,35 +92,7 @@ class LeadCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  status,
-                  style: const TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-              const CircleAvatar(
-                radius: 16,
-                backgroundColor: Color(0xFFF5F5F5),
-                child: Icon(
-                  Icons.person_add_alt_1,
-                  size: 18,
-                  color: Colors.redAccent,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+         
           Text(
             name,
             style: const TextStyle(fontSize: 16, color: Colors.black87),
@@ -158,21 +129,23 @@ class LeadCard extends StatelessWidget {
             child: Text('"$note"', style: const TextStyle(color: Colors.grey)),
           ),
           const SizedBox(height: 16),
-          const _ContactRow(
+           _ContactRow(
             icon: Icons.email_outlined,
-            text: "john@example.com",
+            text:email ,
           ),
           const SizedBox(height: 8),
-          const _ContactRow(
+           _ContactRow(
             icon: Icons.phone_outlined,
-            text: "+880 1234 567890",
+            text: phone,
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    ContactActions.openDialer(phone);
+                  },
                   icon: const Icon(Icons.call, size: 18, color: Colors.white),
                   label: const Text(
                     "Call",
@@ -189,14 +162,16 @@ class LeadCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    ContactActions.openWhatsApp(phone, "Hello, from Scan2Home");
+                  },
                   icon: const Icon(
                     Icons.chat_bubble_outline,
                     size: 18,
                     color: Colors.redAccent,
                   ),
                   label: const Text(
-                    "Message",
+                    "Whatasapp",
                     style: TextStyle(color: Colors.redAccent),
                   ),
                   style: OutlinedButton.styleFrom(

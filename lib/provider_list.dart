@@ -24,6 +24,6 @@ class AppProvider {
     ),
 
     //agent
-      ChangeNotifierProvider(create: (_) => HomeAgentProvider(getIt())..getDashboard()..getPropertyList()..getAgentProfile()),
+      ChangeNotifierProvider(create: (_) => HomeAgentProvider(getIt())..getAgentProfile()..getDashboard()..getPropertyList()..getAgentProfile()..getPropertyType()..fetchOfferData()..getNotification()..fetchLeadsData()),
   ];
 }

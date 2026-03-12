@@ -1,4 +1,9 @@
+import 'package:dips/components/custom_loading_dialog.dart';
+import 'package:dips/components/custom_snackbar.dart';
+import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class OfferDetails extends StatefulWidget {
   const OfferDetails({super.key});
@@ -10,42 +15,19 @@ class OfferDetails extends StatefulWidget {
 class _OfferDetailsState extends State<OfferDetails> {
   final _formKey = GlobalKey<FormState>();
   final _counterPriceCtrl = TextEditingController();
-  final _closingDateCtrl = TextEditingController();
-  final _earnestCtrl = TextEditingController();
   final _messageCtrl = TextEditingController();
 
   @override
   void dispose() {
     _counterPriceCtrl.dispose();
-    _closingDateCtrl.dispose();
-    _earnestCtrl.dispose();
+    ;
     _messageCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: now,
-      lastDate: DateTime(now.year + 5),
-    );
-    if (picked != null) {
-      _closingDateCtrl.text = '${picked.month}/${picked.day}/${picked.year}';
-    }
-  }
-
-  void _sendCounterOffer() {
-    if (!_formKey.currentState!.validate()) return;
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Counter offer sent')));
-  }
-
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeAgentProvider>();
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -117,9 +99,9 @@ class _OfferDetailsState extends State<OfferDetails> {
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              'Sarah Johnson',
+                              provider.selectedOffer.buyerName!,
                               style: TextStyle(fontWeight: FontWeight.w700),
                             ),
                             SizedBox(height: 4),
@@ -155,8 +137,8 @@ class _OfferDetailsState extends State<OfferDetails> {
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            'Modern Villa Downtown',
+                          Text(
+                            provider.selectedOffer.propertyTitle!,
                             style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(height: 8),
@@ -165,8 +147,8 @@ class _OfferDetailsState extends State<OfferDetails> {
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            '£820,000',
+                          Text(
+                            '£${provider.selectedOffer.offerAmount}',
                             style: TextStyle(
                               color: Colors.red,
                               fontWeight: FontWeight.w700,
@@ -178,8 +160,8 @@ class _OfferDetailsState extends State<OfferDetails> {
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
-                            '"Interested in viewing this weekend"',
+                          Text(
+                            provider.selectedOffer.message!,
                             style: TextStyle(color: Colors.grey),
                           ),
                         ],
@@ -243,52 +225,13 @@ class _OfferDetailsState extends State<OfferDetails> {
                             : null,
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Original offer: £820,000',
+                       Text(
+                        'Original offer: £${provider.selectedOffer.offerAmount}',
                         style: TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 12),
 
                       // Proposed Closing Date
-                      const Text(
-                        'Proposed Closing Date',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _closingDateCtrl,
-                        readOnly: true,
-                        onTap: _pickDate,
-                        decoration: InputDecoration(
-                          hintText: 'Select date',
-                          suffixIcon: const Icon(Icons.calendar_today_outlined),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        validator: (v) => (v == null || v.trim().isEmpty)
-                            ? 'Select a date'
-                            : null,
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Earnest Money Deposit
-                      const Text(
-                        'Earnest Money Deposit',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 6),
-                      TextFormField(
-                        controller: _earnestCtrl,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          prefixText: '£ ',
-                          hintText: 'Optional',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 12),
 
                       // Counter Offer Message
@@ -314,7 +257,7 @@ class _OfferDetailsState extends State<OfferDetails> {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => Navigator.maybePop(context),
+                              onPressed: () =>   context.pop(),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(color: Colors.grey.shade300),
                                 padding: const EdgeInsets.symmetric(
@@ -333,7 +276,34 @@ class _OfferDetailsState extends State<OfferDetails> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: _sendCounterOffer,
+                              onPressed: () async {
+                                if (_counterPriceCtrl.text.isNotEmpty &&
+                                    _messageCtrl.text.isNotEmpty) {
+                                      CustomLoading.show(context);
+                                  final response = await provider
+                                      .makeCounterOffer(
+                                        provider.selectedOffer.id!,
+                                        {
+                                          "amount": _counterPriceCtrl.text,
+                                          "message": _messageCtrl.text,
+                                        },
+                                      );
+
+                                  if (response) {
+                                                                          CustomLoading.hide(context);
+                                    AppSnackbar.show(
+                                      context,
+                                      title: "Counter Offer",
+                                      message:
+                                          "Counter Offer sents successfully",
+                                      type: SnackType.success,
+                                    );
+                                    context.pop();
+                                  }
+                                }else{
+                                                                        CustomLoading.hide(context);
+                                }
+                              },
                               icon: const Icon(
                                 Icons.send,
                                 size: 18,
