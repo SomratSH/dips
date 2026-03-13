@@ -176,11 +176,11 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: provider.propertyTypeModel.length,
         itemBuilder: (context, index) {
           final isSelected =
-              _selectedCategory == provider.propertyTypeModel[index].name;
+              _selectedCategory == provider.propertyTypeModel[index];
           return GestureDetector(
             onTap: () async {
               setState(() {
-                _selectedCategory = provider.propertyTypeModel[index].name!;
+                _selectedCategory = provider.propertyTypeModel[index];
               });
               await provider.getPropertyListByValue(_selectedCategory);
             },
@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Center(
                 child: Text(
-                  provider.propertyTypeModel[index].name!,
+                  provider.propertyTypeModel[index],
                   style: TextStyle(
                     color: isSelected ? Colors.white : Colors.grey[600],
                     fontWeight: isSelected
@@ -270,7 +270,14 @@ class _HomeScreenState extends State<HomeScreen> {
             sqft: provider.propertyList[index].size.toString(),
             price: "£ ${provider.propertyList[index].price.toString()}",
             distance: provider.propertyList[index].rating,
-            badge: provider.propertyList[index].isNew ? " " : " ",
+            badge:  provider.propertyList[index].isNew!
+                                ? "New"
+                                : provider
+                                      .propertyList[index].isFeature
+                                      
+                                     
+                                ? "Feature"
+                                : "N/A",
           ),
         
         );

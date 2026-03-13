@@ -93,8 +93,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                _buildPreferences(),
-                const SizedBox(height: 16),
+                // _buildPreferences(),
+                // const SizedBox(height: 16),
                 _buildSecurity(),
                 const SizedBox(height: 16),
                 _buildLogoutButton(() {
@@ -308,7 +308,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               title: 'Saved Properties',
               iconBg: const Color(0xFFFCE7F3),
               iconColor: const Color(0xFFEC4899),
-              onTap: () {},
+              onTap: () {
+                
+              },
             ),
           ),
 
@@ -353,16 +355,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _buildMenuItem(
-              icon: Icons.support_agent_outlined,
-              title: 'Contact Support',
-              iconBg: const Color(0xFFFEF3C7),
-              iconColor: const Color(0xFFF59E0B),
-              onTap: () {},
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 8),
+          //   child: _buildMenuItem(
+          //     icon: Icons.support_agent_outlined,
+          //     title: 'Contact Support',
+          //     iconBg: const Color(0xFFFEF3C7),
+          //     iconColor: const Color(0xFFF59E0B),
+          //     onTap: () {},
+          //   ),
+          // ),
         ],
       ),
     );

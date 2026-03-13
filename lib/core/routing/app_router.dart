@@ -8,6 +8,7 @@ import 'package:dips/presentation/agent/offer/offer_agent.dart';
 import 'package:dips/presentation/agent/offer/offer_details.dart';
 import 'package:dips/presentation/agent/profile/edit_agent_profile.dart';
 import 'package:dips/presentation/agent/profile/leads_screen.dart';
+import 'package:dips/presentation/agent/profile/my_property.dart';
 import 'package:dips/presentation/agent/profile/profile_agent.dart';
 import 'package:dips/presentation/authentication/create_new_password_screen.dart';
 import 'package:dips/presentation/authentication/forgot_password.dart';
@@ -221,6 +222,10 @@ class AppRouter {
         GoRoute(
           path: RoutePath.chatbot,
           builder: (context, state) => const ChatBotScreen(),
+        ),
+         GoRoute(
+          path: RoutePath.myAgentProperty,
+          builder: (context, state) => const MyProperty(),
         ),
       ],
     );

@@ -6,6 +6,7 @@ import 'package:dips/data/model/favourite_json.dart';
 import 'package:dips/data/model/property_details_json.dart';
 import 'package:dips/data/model/property_json.dart';
 import 'package:dips/data/model/property_type_json.dart';
+import 'package:dips/data/model/qr_property_model.dart';
 import 'package:dips/domain/entity/property_model.dart';
 import 'package:dips/domain/entity/property_type_model.dart';
 import 'package:dips/domain/property/home_repository.dart';
@@ -15,24 +16,14 @@ class HomeImp implements HomeRepository {
   final ApiService _apiService = ApiService();
 
   @override
-  Future<List<PropertyTypeModel>> getPropertyType() async {
+  Future<List<dynamic>> getPropertyType() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-
-    final response = await _apiService.getList(
-      AppUrls.getPropertyType,
+    final reponse = await _apiService.getList(
+      AppUrls.getPropertyTypeAgent,
       authToken: preferences.getString("authToken"),
     );
-
-    List<dynamic> data = response;
-
-    return data
-        .map(
-          (e) =>
-              PropertyTypeJson.fromJson(e as Map<String, dynamic>).toDomain(),
-        )
-        .toList();
+    return reponse;
   }
-
   @override
   Future<List<PropertyModel>> getProperty() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -205,7 +196,7 @@ class HomeImp implements HomeRepository {
     return data.map((e) => Results.fromJson(e).toDomain()).toList();
   }
 
-   @override
+  @override
   Future<List<FavouriteJson>> getFavourite() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     final response = await _apiService.getList(
@@ -214,5 +205,30 @@ class HomeImp implements HomeRepository {
     );
     final List<dynamic> data = response;
     return data.map((e) => FavouriteJson.fromJson(e)).toList();
+  }
+
+  @override
+  Future<String> getQrCodeResponse(String id) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final response = await _apiService.getDatav(
+      id,
+      authToken: preferences.getString("authToken"),
+    );
+    print(response);
+    if (response["redirect_url"] != null && response["property_id"] != null) {
+      return response["redirect_url"];
+    } else {
+      return "";
+    }
+  }
+
+  @override
+  Future<QrPropertyModel> getQrProperty(String id) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final response = await _apiService.getDatav(
+      id,
+      authToken: preferences.getString("authToken"),
+    );
+    return QrPropertyModel.fromJson(response);
   }
 }

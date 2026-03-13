@@ -43,4 +43,6 @@ class RoutePath {
   static String termsCondition = "/termsCondition";
 
   static String leads = "/leads";
+
+  static String myAgentProperty = "/myAgentProperty";
 }

@@ -1,7 +1,10 @@
+import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/core/routing/route_path.dart';
+import 'package:dips/presentation/user/home/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
 
 
 
@@ -39,6 +42,7 @@ class _QRScanScreenState extends State<QRScanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider  = context.watch<HomeProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
@@ -97,12 +101,22 @@ class _QRScanScreenState extends State<QRScanScreen> {
 
                             autoStart: true,
                           ),
-                          onDetect: (capture) {
+                          onDetect: (capture) async{
                             print(capture);
                             final List<Barcode> barcodes = capture.barcodes;
                             for (final barcode in barcodes) {
                               debugPrint('Barcode found! ${barcode.rawValue}');
-                              context.push(RoutePath.resultScanner);
+
+                              final response = await provider.getQrCodeResponse(barcode.rawValue!);
+
+                              if(response){
+                                context.push(RoutePath.resultScanner);
+                              }else{
+                                AppSnackbar.show(context, title:"Scan qr code", message: "No data found!");
+                              }
+                              
+
+                              
                               // Handle your logic here (e.g., Navigator.pop with result)
                             }
                           },

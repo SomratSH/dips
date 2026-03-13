@@ -1,6 +1,7 @@
 import 'package:dips/components/custom_snackbar.dart';
 import 'package:dips/data/model/favourite_json.dart';
 import 'package:dips/data/model/property_details_json.dart';
+import 'package:dips/data/model/qr_property_model.dart';
 import 'package:dips/domain/entity/property_model.dart';
 import 'package:dips/domain/entity/property_type_model.dart';
 import 'package:dips/domain/property/home_repository.dart';
@@ -15,7 +16,7 @@ class HomeProvider extends ChangeNotifier {
   List<PropertyModel> propertyList = [];
   bool isLoading = false;
 
-  List<PropertyTypeModel> propertyTypeModel = [];
+  List<dynamic> propertyTypeModel = [];
 
   Future<void> getPropertyList() async {
     isLoading = true;
@@ -189,6 +190,19 @@ class HomeProvider extends ChangeNotifier {
     } else {
       isLoading = false;
       notifyListeners();
+    }
+  }
+
+  QrPropertyModel qrPropertyModel = QrPropertyModel();
+  Future<bool> getQrCodeResponse(String id)async{
+    final response = await _homeRepository.getQrCodeResponse(id);
+    if(response.isNotEmpty && response != ""){
+      final data = await _homeRepository.getQrProperty(response);
+      qrPropertyModel = data;
+      notifyListeners();
+      return true;
+    }else{
+      return false;
     }
   }
 }

@@ -302,7 +302,7 @@ class PropertyDetailScreen extends StatelessWidget {
                               color: Colors.black,
                             ),
                             label: const Text(
-                              'Schedule Waiting',
+                              'Book Viewing',
                               style: TextStyle(color: Colors.black),
                             ),
                             style: OutlinedButton.styleFrom(
@@ -592,37 +592,37 @@ class PropertyDetailScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: DecoratedBox(
-                        decoration: ShapeDecoration(
-                          color: const Color(0xFF041E41),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
+                    // SizedBox(
+                    //   width: double.infinity,
+                    //   child: DecoratedBox(
+                    //     decoration: ShapeDecoration(
+                    //       color: const Color(0xFF041E41),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(12),
+                    //       ),
+                    //     ),
 
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.near_me, color: Colors.white),
-                              Text(
-                                'Get Direction ',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.25,
-                                  fontFamily: 'Lato',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.43,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    //     child: Padding(
+                    //       padding: const EdgeInsets.all(12.0),
+                    //       child: Row(
+                    //         mainAxisAlignment: MainAxisAlignment.center,
+                    //         children: [
+                    //           Icon(Icons.near_me, color: Colors.white),
+                    //           Text(
+                    //             'Get Direction ',
+                    //             style: TextStyle(
+                    //               color: Colors.white,
+                    //               fontSize: 16.25,
+                    //               fontFamily: 'Lato',
+                    //               fontWeight: FontWeight.w400,
+                    //               height: 1.43,
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
 
                     const SizedBox(height: 24),
 
@@ -637,7 +637,7 @@ class PropertyDetailScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     SizedBox(
-                      height: 400,
+                      height: 425,
                       child: ListView(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 16),

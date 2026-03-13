@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dips/components/custom_button.dart';
 import 'package:dips/components/custom_snackbar.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class AddProperitesAgent extends StatefulWidget {
   const AddProperitesAgent({super.key});
 
@@ -88,37 +90,96 @@ class _AddProperitesAgentState extends State<AddProperitesAgent> {
     }
   }
 
-  void _saveProperty() {
-    if (!_formKey.currentState!.validate()) return;
 
-    // Final data structure for API
-    final Map<String, dynamic> bodyData = {
-      "title": _titleCtrl.text,
-      "description": _descCtrl.text,
-      "property_type": _propertyType,
-      "price": _priceCtrl.text,
-      "address": _addressCtrl.text,
-      "postcode": _postcodeCtrl.text,
-      "beds": int.tryParse(_bedsCtrl.text) ?? 0,
-      "baths": int.tryParse(_bathsCtrl.text) ?? 0,
-      "size_sqft": int.tryParse(_sizeCtrl.text) ?? 0,
-      "parking_slots": int.tryParse(_parkingCtrl.text) ?? 0,
-      "has_pool": _hasPool,
-      "has_garden": _hasGarden,
-      "image_count": _selectedImages.length,
-      "has_video": _agentVideo != null,
-    };
 
-    debugPrint("JSON Data: $bodyData");
-    debugPrint("Files to upload: ${_selectedImages.length} images and ${_agentVideo?.path}");
+Future<void> _saveProperty() async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  if (!_formKey.currentState!.validate()) return;
 
-    AppSnackbar.show(
-      context,
-      title: "Success",
-      message: "Property data prepared successfully",
+  // 1. Create the Multipart Request
+  var request = http.MultipartRequest(
+    'POST',
+    
+    Uri.parse('https://api.scan2home.co.uk/api/v1/agent/properties/create/',),
+  );
+
+  request.headers.addAll({
+    'Authorization': 'Bearer ${preferences.getString("authToken")}',
+    'Accept': 'application/json', // Good practice for Laravel/Node backends
+    'Content-Type': 'multipart/form-data',
+  });
+
+  // 2. Add Text Fields (Note: All multipart values are strings)
+  request.fields.addAll({
+    "title": _titleCtrl.text,
+    "description": _descCtrl.text,
+    "property_type": _propertyType,
+    "price": _priceCtrl.text,
+    "address": _addressCtrl.text,
+    "postcode": _postcodeCtrl.text,
+    "lat": "40.712800", // You can add controllers for these later
+    "lon": "-74.006000",
+    "status": "available",
+    "is_featured": "false",
+    "beds": _bedsCtrl.text,
+    "baths": _bathsCtrl.text,
+    "size_sqft": _sizeCtrl.text,
+    "parking_slots": _parkingCtrl.text,
+    "has_pool": _hasPool.toString(),
+    "has_garden": _hasGarden.toString(),
+    "has_garage": "true",
+    "has_fireplace": "false",
+    "is_smart_home": "true",
+    "has_gym": "true",
+    "is_pet_friendly": "true",
+  });
+
+  // 3. Add Multiple Images
+  for (File image in _selectedImages) {
+    var stream = http.ByteStream(image.openRead());
+    var length = await image.length();
+    var multipartFile = http.MultipartFile(
+      'uploaded_images', // Field name expected by backend
+      stream,
+      length,
+      filename: image.path.split('/').last,
     );
-    context.pop();
+    request.files.add(multipartFile);
   }
+
+  // 4. Add Video
+  if (_agentVideo != null) {
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'uploaded_video', // Field name expected by backend
+        _agentVideo!.path,
+      ),
+    );
+  }
+
+  // 5. Send Request
+  try {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    var response = await request.send();
+
+    Navigator.pop(context); // Close loading dialog
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      AppSnackbar.show(context, title: "Success", message: "Property Uploaded!");
+      context.pop();
+    } else {
+      AppSnackbar.show(context, title: "Error", message: "Server Error: ${response.statusCode}");
+    }
+  } catch (e) {
+    Navigator.pop(context);
+    AppSnackbar.show(context, title: "Error", message: e.toString());
+  }
+}
 
   // --- UI Components ---
 

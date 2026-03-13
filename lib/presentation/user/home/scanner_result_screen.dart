@@ -2,12 +2,18 @@ import 'package:dips/components/custom_padding.dart';
 import 'package:dips/components/custom_share.dart';
 import 'package:dips/components/property_card.dart';
 import 'package:dips/core/routing/route_path.dart';
+import 'package:dips/presentation/user/home/home_provider.dart';
+import 'package:dips/presentation/user/home/widget/agent_details.dart';
+import 'package:dips/presentation/user/home/widget/agent_details_qr_code.dart';
 import 'package:dips/presentation/user/home/widget/booking_view_dialog.dart';
 import 'package:dips/presentation/user/home/widget/make_offer_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import 'package:chewie/chewie.dart';
+import 'package:video_player/video_player.dart';
 
 
 class ScannerResultScreen extends StatelessWidget {
@@ -15,6 +21,7 @@ class ScannerResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<HomeProvider>();
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
 
@@ -79,7 +86,7 @@ class ScannerResultScreen extends StatelessWidget {
                               ),
                               image: DecorationImage(
                                 image: NetworkImage(
-                                  'https://media.istockphoto.com/id/1398814566/photo/interior-of-small-apartment-living-room-for-home-office.jpg?s=612x612&w=0&k=20&c=8clwg8hTpvoEwL7253aKdYAUuAp1-usFOacNR5qX-Rg=',
+                                 provider.qrPropertyModel.images == null || provider.qrPropertyModel.images!.isEmpty ?   'https://media.istockphoto.com/id/1398814566/photo/interior-of-small-apartment-living-room-for-home-office.jpg?s=612x612&w=0&k=20&c=8clwg8hTpvoEwL7253aKdYAUuAp1-usFOacNR5qX-Rg=' : provider.qrPropertyModel.images!.first.image!,
                                 ),
                                 fit: BoxFit.cover,
                               ),
@@ -98,9 +105,9 @@ class ScannerResultScreen extends StatelessWidget {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Expanded(
+                                     Expanded(
                                       child: Text(
-                                        'Modern 2-Bed Apartment',
+                                       provider.qrPropertyModel.title! ,
                                         style: TextStyle(
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold,
@@ -126,14 +133,14 @@ class ScannerResultScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 16),
                                     Text(
-                                      'Apartments',
+                                      provider.qrPropertyModel.propertyType!,
                                       style: TextStyle(color: Colors.grey[600]),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  '£250,000',
+                                  '£${provider.qrPropertyModel.price}',
                                   style: TextStyle(
                                     color: const Color(0xFFE63946),
                                     fontSize: 16,
@@ -146,7 +153,7 @@ class ScannerResultScreen extends StatelessWidget {
                                   children: [
                                     Icon(Icons.near_me, color: Colors.grey),
                                     Text(
-                                      'Parker Rd.New Mexico',
+                                     provider.qrPropertyModel.address!,
                                       style: TextStyle(
                                         color: const Color(0xFF666666),
                                         fontSize: 16,
@@ -189,13 +196,13 @@ class ScannerResultScreen extends StatelessWidget {
                               children: [
                                 _buildFeature(
                                   "assets/icons/bedrooms.svg",
-                                  '2',
+                                  provider.qrPropertyModel.beds!.toString(),
                                   'Bedrooms',
                                 ),
                                 CustomPadding().vPad30,
                                 _buildFeature(
                                   "assets/icons/bathroom.svg",
-                                  '2',
+                                  provider.qrPropertyModel.baths!.toString(),
                                   'Bathrooms',
                                 ),
                               ],
@@ -205,13 +212,14 @@ class ScannerResultScreen extends StatelessWidget {
                               children: [
                                 _buildFeature(
                                   "assets/icons/sqfit.svg",
-                                  '1,225',
+                                  provider.qrPropertyModel.sizeSqft.toString(),
                                   'sqft',
                                 ),
                                 CustomPadding().vPad30,
                                 _buildFeature(
                                   "assets/icons/car.svg",
-                                  '1',
+                                  provider.qrPropertyModel.parkingSlots!.toString(),
+                                  
                                   'Parking',
                                 ),
                               ],
@@ -230,7 +238,8 @@ class ScannerResultScreen extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: () {
                               ContactActions.openWhatsApp(
-                                "911234567890",
+                                  provider.qrPropertyModel.agent!.phone!,
+                                
                                 "Hello! I am contacting you from Scan2Home app.",
                               );
                             },
@@ -252,7 +261,7 @@ class ScannerResultScreen extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () {
-                              ContactActions.openDialer("1234567890");
+                              ContactActions.openDialer(provider.qrPropertyModel.agent!.phone!);
                             },
                             icon: const Icon(Icons.call, color: Colors.black),
                             label: const Text(
@@ -288,7 +297,7 @@ class ScannerResultScreen extends StatelessWidget {
                               color: Colors.black,
                             ),
                             label: const Text(
-                              'Schedule Waiting',
+                              'Booking View',
                               style: TextStyle(color: Colors.black),
                             ),
                             style: OutlinedButton.styleFrom(
@@ -360,12 +369,12 @@ class ScannerResultScreen extends StatelessWidget {
                               children: [
                                 CircleAvatar(
                                   foregroundImage: NetworkImage(
-                                    "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400",
+                                   provider.qrPropertyModel.agent!.agentProfile!.agentPhoto  ??  "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400",
                                   ),
                                 ),
                                 CustomPadding().hPad10,
-                                const Text(
-                                  'Meet Agent - Dan Williams',
+                                 Text(
+                                  'Meet Agent - ${provider.qrPropertyModel.agent!.fullName}',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -376,63 +385,9 @@ class ScannerResultScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Container(
-                                  height: 180,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    image: const DecorationImage(
-                                      image: NetworkImage(
-                                        'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400',
-                                      ),
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 60,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.play_arrow,
-                                    size: 40,
-                                    color: Color(0xFF1A237E),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 12,
-                                  left: 12,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        'Dan Williams',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Senior Real Estate Agent',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                        provider.qrPropertyModel.video == null ? SizedBox( ): Padding(
+                            padding:  EdgeInsets.all(12.0),
+                            child: VideoPreviewCard(videoUrl:  provider.qrPropertyModel.video!.videoFile!,)
                           ),
                         ],
                       ),
@@ -442,32 +397,42 @@ class ScannerResultScreen extends StatelessWidget {
 
                     SizedBox(
                       width: double.infinity,
-                      child: DecoratedBox(
-                        decoration: ShapeDecoration(
-                          color: const Color(0xFF041E41),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      child: InkWell(
+                        onTap: (){
+                           showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => const AgentDetailsQrCode(),
+                          );
+                        },
+                        child: DecoratedBox(
+                          decoration: ShapeDecoration(
+                            color: const Color(0xFF041E41),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                        ),
-
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.visibility, color: Colors.white),
-                              CustomPadding().hPad5,
-                              Text(
-                                'VIew Agent Details',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.25,
-                                  fontFamily: 'Lato',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.43,
+                        
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.visibility, color: Colors.white),
+                                CustomPadding().hPad5,
+                                Text(
+                                  'VIew Agent Details',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.25,
+                                    fontFamily: 'Lato',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.43,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -596,64 +561,64 @@ class ScannerResultScreen extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // Similar Properties
-                    const Text(
-                      'Similar Properties',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    // // Similar Properties
+                    // const Text(
+                    //   'Similar Properties',
+                    //   style: TextStyle(
+                    //     fontSize: 18,
+                    //     fontWeight: FontWeight.bold,
+                    //   ),
+                    // ),
+                    // const SizedBox(height: 12),
 
-                    SizedBox(
-                      height: 400,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        children: [
-                          SizedBox(
-                            width: 300, // 🔥 REQUIRED
-                            child: PropertyCard(
-                              onTap: () =>
-                                  context.push(RoutePath.myPropertiesDetails),
-                              imageUrl:
-                                  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
-                              title: 'Modern 3-Bed Apartment',
-                              rating: '4.5',
-                              location: 'Parker Rd New Mexico',
-                              beds: 3,
-                              baths: 2,
-                              sqft: '1,200 sqft',
-                              price: '£250,000',
-                              distance: '2.3 km',
-                              badge: 'Best Offer',
-                            ),
-                          ),
-                          const SizedBox(width: 16),
+                    // SizedBox(
+                    //   height: 400,
+                    //   child: ListView(
+                    //     scrollDirection: Axis.horizontal,
+                    //     padding: const EdgeInsets.symmetric(horizontal: 16),
+                    //     children: [
+                    //       SizedBox(
+                    //         width: 300, // 🔥 REQUIRED
+                    //         child: PropertyCard(
+                    //           onTap: () =>
+                    //               context.push(RoutePath.myPropertiesDetails),
+                    //           imageUrl:
+                    //               'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800',
+                    //           title: 'Modern 3-Bed Apartment',
+                    //           rating: '4.5',
+                    //           location: 'Parker Rd New Mexico',
+                    //           beds: 3,
+                    //           baths: 2,
+                    //           sqft: '1,200 sqft',
+                    //           price: '£250,000',
+                    //           distance: '2.3 km',
+                    //           badge: 'Best Offer',
+                    //         ),
+                    //       ),
+                    //       const SizedBox(width: 16),
 
-                          SizedBox(
-                            width: 300,
-                            child: PropertyCard(
-                              onTap: () =>
-                                  context.push(RoutePath.myPropertiesDetails),
-                              imageUrl:
-                                  'https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=800',
-                              title: 'Contemporary Apartment',
-                              rating: '4.3',
-                              location: 'Dhanmondi, Dhaka',
-                              beds: 2,
-                              baths: 2,
-                              sqft: '950 sqft',
-                              price: '£180,000',
-                              distance: '1.8 km',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    //       SizedBox(
+                    //         width: 300,
+                    //         child: PropertyCard(
+                    //           onTap: () =>
+                    //               context.push(RoutePath.myPropertiesDetails),
+                    //           imageUrl:
+                    //               'https://images.unsplash.com/photo-1556912173-46c336c7fd55?w=800',
+                    //           title: 'Contemporary Apartment',
+                    //           rating: '4.3',
+                    //           location: 'Dhanmondi, Dhaka',
+                    //           beds: 2,
+                    //           baths: 2,
+                    //           sqft: '950 sqft',
+                    //           price: '£180,000',
+                    //           distance: '1.8 km',
+                    //         ),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
 
-                    const SizedBox(width: 20),
+                    // const SizedBox(width: 20),
                   ],
                 ),
               ),
@@ -787,6 +752,171 @@ class ScannerResultScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+
+class FullScreenVideoPlayer extends StatefulWidget {
+  final String url;
+
+  const FullScreenVideoPlayer({super.key, required this.url});
+
+  @override
+  State<FullScreenVideoPlayer> createState() => _FullScreenVideoPlayerState();
+}
+
+class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+  late VideoPlayerController _videoPlayerController;
+  ChewieController? _chewieController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(widget.url));
+    
+    await _videoPlayerController.initialize();
+
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController,
+      autoPlay: true,
+      looping: false,
+      aspectRatio: _videoPlayerController.value.aspectRatio,
+      // This allows the video to go into landscape mode automatically
+      allowFullScreen: true, 
+      fullScreenByDefault: true, 
+      errorBuilder: (context, errorMessage) {
+        return Center(
+          child: Text(errorMessage, style: const TextStyle(color: Colors.white)),
+        );
+      },
+    );
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: _chewieController != null && 
+               _chewieController!.videoPlayerController.value.isInitialized
+            ? Chewie(controller: _chewieController!)
+            : const CircularProgressIndicator(color: Colors.white),
+      ),
+    );
+  }
+}
+class VideoPreviewCard extends StatefulWidget {
+  final String videoUrl;
+  const VideoPreviewCard({super.key, required this.videoUrl});
+
+  @override
+  State<VideoPreviewCard> createState() => _VideoPreviewCardState();
+}
+
+class _VideoPreviewCardState extends State<VideoPreviewCard> {
+  // You would typically use a package like 'url_launcher' 
+  // or a dedicated VideoPlayer screen here.
+  
+void _playVideo() {
+  // 1. Log for debugging
+  debugPrint("Attempting to play: ${widget.videoUrl}");
+
+  // 2. Simple validation to prevent crashes if URL is missing
+  if (widget.videoUrl.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Video URL is not available")),
+    );
+    return;
+  }
+
+  // 3. Navigation to the Player Screen
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => FullScreenVideoPlayer(url: widget.videoUrl),
+    ),
+  );
+}
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: ClipRRect( // Ensures image and overlay stay inside corners
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 1. The Thumbnail
+            Container(
+              height: 180,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(
+                    'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400',
+                  ),
+                  fit: BoxFit.cover, // Changed from fill to cover for better look
+                ),
+              ),
+            ),
+            
+            // 2. Dark Gradient Overlay (Makes white text readable)
+            Container(
+              height: 180,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.7)],
+                ),
+              ),
+            ),
+
+            // 3. Play Button
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _playVideo,
+                customBorder: const CircleBorder(),
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow,
+                    size: 40,
+                    color: Color(0xFF1A237E),
+                  ),
+                ),
+              ),
+            ),
+
+           
+          ],
+        ),
       ),
     );
   }

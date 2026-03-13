@@ -3,7 +3,6 @@ import 'package:dips/presentation/agent/home/widget/activity_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-
 class RecentActivityCard extends StatelessWidget {
   const RecentActivityCard({super.key});
 
@@ -32,33 +31,35 @@ class RecentActivityCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children:  [
+        children: [
           Text(
             "Recent Activity",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 12),
 
-       provider.agentDashboardModel.recentActivity!.isEmpty ? Center(
-        child: Text("No acitvity available")
-       ) : Column(
-          children: List.generate(provider.agentDashboardModel.recentActivity!.length, (index) {
-            final data = provider.agentDashboardModel.recentActivity![index];
-            return Column(
-              children: [
-                 ActivityItem(
-            color: Colors.green,
-            title: data.propertyName!,
-            subtitle: data.activity!,
-            time: data.time!,
-          ),
+          (provider.agentDashboardModel.recentActivity?.isEmpty ?? true)
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text("No activity available"),
+                  ),
+                )
+              : Column(
+                  children: [
+                    // 2. Use the spread operator for a cleaner list injection
+                    for (var data
+                        in provider.agentDashboardModel.recentActivity!)
+                      ActivityItem(
+                        // 3. Dynamic color logic (optional suggestion: green for 'Completed', etc.)
+                        color: Colors.green,
+                        title: data.propertyName ?? 'Unknown Property',
+                        subtitle: data.activity ?? 'No details provided',
+                        time: data.time ?? '',
+                      ),
+                  ],
+                ),
           Divider(),
-              ],
-            );
-          }),
-        )
-
-         
         ],
       ),
     );

@@ -231,4 +231,51 @@ class AgentImp implements AgentRepository {
       return false;
     }
   }
+
+    @override
+  Future<List<PropertyModel>> getMyPropertyAgent() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    final response = await _apiService.getData(
+      AppUrls.getMyPropertyAgent,
+      authToken: preferences.getString("authToken"),
+    );
+
+    if (response == null || response["results"] == null) {
+      return [];
+    }
+
+    final List<dynamic> data = response["results"];
+
+    return data.map((e) => Results.fromJson(e).toDomain()).toList();
+  }
+
+  @override
+  Future<String> createBoard()async{
+     SharedPreferences preferences = await SharedPreferences.getInstance();
+    final response = await _apiService.postDataWithoutBody(AppUrls.createBoard, authToken: preferences.getString("authToken"));
+
+    if(response["id"] != null){
+      return response["id"];
+    }else{
+      return "";
+    }
+  }
+@override
+Future<String> assignBoard(String id, String propertyId )async{
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  final response = await _apiService.patchData("${AppUrls.assignBoard}$id/reassign/", {
+  "property_id": propertyId
+  },
+  
+  authToken: preferences.getString("authToken")
+  );
+  if(response["id"] != null && response["qr_code_image"] != null){
+    final data = response["qr_code_image"];
+    return data;
+  }else{
+    return "";
+  }
+}
+
 }

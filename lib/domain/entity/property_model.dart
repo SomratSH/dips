@@ -3,8 +3,8 @@ class PropertyModel {
   String name;
   String rating;
   String location;
-  double lat;
-  double long;
+  String lat;
+  String long;
   bool isFeature;
   bool isNew;
   int bed;
@@ -13,6 +13,7 @@ class PropertyModel {
   double size;
   String image;
   bool isFav;
+  String qrCode;
 
   PropertyModel(
     this.id,
@@ -29,5 +30,6 @@ class PropertyModel {
     this.size,
     this.image,
     this.isFav,
+    this.qrCode,
   );
 }

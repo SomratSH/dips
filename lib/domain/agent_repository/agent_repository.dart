@@ -34,5 +34,10 @@ abstract class AgentRepository {
 
   Future<bool> markAsRead(String id);
 
+  Future<List<PropertyModel>> getMyPropertyAgent();
+
+  Future<String> createBoard();
+
+  Future<String> assignBoard(String id, String propertyId);
 
 }

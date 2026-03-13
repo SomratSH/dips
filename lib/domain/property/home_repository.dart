@@ -1,10 +1,11 @@
 import 'package:dips/data/model/favourite_json.dart';
 import 'package:dips/data/model/property_details_json.dart';
+import 'package:dips/data/model/qr_property_model.dart';
 import 'package:dips/domain/entity/property_model.dart';
 import 'package:dips/domain/entity/property_type_model.dart';
 
 abstract class HomeRepository {
-  Future<List<PropertyTypeModel>> getPropertyType();
+  Future<List<dynamic>> getPropertyType();
   Future<List<PropertyModel>> getProperty();
   Future<List<PropertyModel>> getPropertyByValue(String value);
   Future<bool> addPropertyFavourite(String id);
@@ -23,4 +24,8 @@ abstract class HomeRepository {
   );
 
   Future<List<FavouriteJson>> getFavourite();
+
+  Future<String> getQrCodeResponse(String id);
+
+  Future<QrPropertyModel> getQrProperty(String id);
 }

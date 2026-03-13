@@ -1,4 +1,5 @@
 import 'package:dips/components/custom_padding.dart';
+import 'package:dips/core/routing/app_router.dart';
 import 'package:dips/core/routing/route_path.dart';
 import 'package:dips/presentation/agent/home/home_agent_provider.dart';
 import 'package:dips/presentation/authentication/authentication_provider.dart';
@@ -326,10 +327,12 @@ class _ProfileAgentState extends State<ProfileAgent> {
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: _buildMenuItem(
               icon: Icons.home_outlined,
-              title: 'All Properties',
+              title: 'My Properties',
               iconBg: const Color(0xFFDBEAFE),
               iconColor: const Color(0xFF3B82F6),
-              onTap: () {},
+              onTap: () {
+                context.push(RoutePath.myAgentProperty);
+              },
             ),
           ),
 
@@ -387,16 +390,16 @@ class _ProfileAgentState extends State<ProfileAgent> {
             ),
           ),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: _buildMenuItem(
-              icon: Icons.support_agent_outlined,
-              title: 'Contact Support',
-              iconBg: const Color(0xFFFEF3C7),
-              iconColor: const Color(0xFFF59E0B),
-              onTap: () {},
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(vertical: 8),
+          //   child: _buildMenuItem(
+          //     icon: Icons.support_agent_outlined,
+          //     title: 'Contact Support',
+          //     iconBg: const Color(0xFFFEF3C7),
+          //     iconColor: const Color(0xFFF59E0B),
+          //     onTap: () {},
+          //   ),
+          // ),
         ],
       ),
     );
@@ -545,7 +548,7 @@ class _ProfileAgentState extends State<ProfileAgent> {
           const SizedBox(height: 16),
           _buildPreferenceItem(
             title: 'Push Notifications',
-            subtitle: 'Get alerts for new listings',
+            subtitle: 'New Lead Email Alerts',
             value: _pushNotifications,
             onChanged: (value) {
               setState(() {
@@ -556,7 +559,7 @@ class _ProfileAgentState extends State<ProfileAgent> {
           const SizedBox(height: 12),
           _buildPreferenceItem(
             title: 'Email Updates',
-            subtitle: 'Receive weekly newsletters',
+            subtitle: 'New Lead Email Alerts',
             value: _emailUpdates,
             onChanged: (value) {
               setState(() {

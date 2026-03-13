@@ -40,13 +40,14 @@ class Results {
   int? beds;
   int? baths;
   int? sizeSqft;
-  double? lat;
-  double? lon;
+  String? lat;
+  String? lon;
   String? coverImage;
   int? viewsCount;
   bool? isFavourited;
   String? createdAt;
   String? agentId;
+    AssignedQrBoard? assignedQrBoard;
 
   Results({
     this.id,
@@ -68,6 +69,7 @@ class Results {
     this.isFavourited,
     this.createdAt,
     this.agentId,
+     this.assignedQrBoard
   });
 
   Results.fromJson(Map<String, dynamic> json) {
@@ -90,6 +92,9 @@ class Results {
     isFavourited = json['is_favourited'];
     createdAt = json['created_at'];
     agentId = json['agent_id'];
+     assignedQrBoard = json['assigned_qr_board'] != null
+        ? new AssignedQrBoard.fromJson(json['assigned_qr_board'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -113,16 +118,21 @@ class Results {
     data['is_favourited'] = this.isFavourited;
     data['created_at'] = this.createdAt;
     data['agent_id'] = this.agentId;
+    if (this.assignedQrBoard != null) {
+      data['assigned_qr_board'] = this.assignedQrBoard!.toJson();
+    }
     return data;
   }
+
+  
 
   PropertyModel toDomain() => PropertyModel(
     id!,
     title!,
     "2.5",
     address!,
-    lat ?? 0.0,
-    lon ?? 0.0,
+    lat ?? "0.0",
+    lon ?? "0.0",
     double.parse(price.toString()),
     isFeatured!,
     isNew!,
@@ -131,5 +141,29 @@ class Results {
     sizeSqft!.toDouble(),
     coverImage ?? "",
     isFavourited!,
+    assignedQrBoard != null ? assignedQrBoard!.qrCodeImage! : "",
   );
+}
+
+
+class AssignedQrBoard {
+  String? id;
+  String? qrCodeImage;
+  int? scanCount;
+
+  AssignedQrBoard({this.id, this.qrCodeImage, this.scanCount});
+
+  AssignedQrBoard.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    qrCodeImage = json['qr_code_image'];
+    scanCount = json['scan_count'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['qr_code_image'] = this.qrCodeImage;
+    data['scan_count'] = this.scanCount;
+    return data;
+  }
 }

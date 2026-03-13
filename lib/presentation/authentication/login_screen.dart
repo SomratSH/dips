@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Image.asset("assets/image/logo_name.png", height: 60),
                         const SizedBox(height: 12),
                         const Text(
-                          "Scan. Discover. More",
+                          "Scan. Discover. Move",
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                         const SizedBox(height: 20),

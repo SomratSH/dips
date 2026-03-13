@@ -273,7 +273,7 @@ class PropertyCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    property.price.toString(),
+                   "£" + property.price.toString(),
                     style: const TextStyle(
                       fontSize: 18,
                       color: Colors.red,

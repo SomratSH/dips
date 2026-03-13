@@ -1,46 +1,50 @@
-import 'dart:async';
 import 'package:dips/domain/ai_chat_repository/ai_chat_repository.dart';
 import 'package:flutter/material.dart';
 
-
 class ChatbotProvider extends ChangeNotifier {
-  AiChatRepository _aiChatRepository;
-
+  final AiChatRepository _aiChatRepository;
   ChatbotProvider(this._aiChatRepository);
 
   final TextEditingController controller = TextEditingController();
   final ScrollController scrollController = ScrollController();
+  
+  final List<ChatMessage> _messages = [];
+  List<ChatMessage> get messages => _messages;
 
-  final List<_Message> _messages = [];
-  List<_Message> get messages => _messages;
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
 
   Future<void> getChat(String text) async {
-    final response = await _aiChatRepository.chatAi({"message": text});
-
-    if (response.isNotEmpty) {
-      sendMessage(response["reply"]);
-    }
-  }
-
-  void sendMessage(String text) {
     final trimmed = text.trim();
     if (trimmed.isEmpty) return;
 
-    _messages.add(_Message(text: trimmed, isUser: true));
+    // 1. Add User Message
+    _messages.add(ChatMessage(text: trimmed, isUser: true));
     controller.clear();
+    _isLoading = true; // Show loading indicator
     notifyListeners();
     _scrollToBottom();
 
-    // Fake bot response
-    Timer(const Duration(seconds: 1), () {
-      _messages.add(_Message(text: text, isUser: false));
-      notifyListeners();
-      _scrollToBottom();
-    });
+    try {
+      final response = await _aiChatRepository.chatAi({"message": trimmed});
+      
+      _isLoading = false;
+      if (response != null && response.containsKey("reply")) {
+        _messages.add(ChatMessage(text: response["reply"], isUser: false));
+      } else {
+        _messages.add(ChatMessage(text: "Sorry, I couldn't process that.", isUser: false));
+      }
+    } catch (e) {
+      _isLoading = false;
+      _messages.add(ChatMessage(text: "Connection error. Please try again.", isUser: false));
+    }
+
+    notifyListeners();
+    _scrollToBottom();
   }
 
   void _scrollToBottom() {
-    Future.delayed(const Duration(milliseconds: 100), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         scrollController.animateTo(
           scrollController.position.maxScrollExtent,
@@ -52,9 +56,8 @@ class ChatbotProvider extends ChangeNotifier {
   }
 }
 
-class _Message {
+class ChatMessage {
   final String text;
   final bool isUser;
-
-  _Message({required this.text, required this.isUser});
+  ChatMessage({required this.text, required this.isUser});
 }

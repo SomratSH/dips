@@ -350,6 +350,29 @@ class ApiService {
     }
   }
 
+  Future<Map<String, dynamic>> getDatav(
+    String endpoint, {
+    String? authToken,
+  }) async {
+    try {
+      Map<String, String> headers = {'Content-Type': 'application/json'};
+
+      if (authToken != null && authToken.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $authToken';
+      }
+
+      final response = await http.get(
+        Uri.parse('$endpoint'),
+        headers: headers,
+      );
+      return _handleResponse(response);
+    } on http.ClientException catch (e) {
+      return _handleError('Network error: ${e.message}');
+    } catch (e) {
+      return _handleError('An unexpected error occurred: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> getDataJwt(
     String endpoint, {
     String? authToken,

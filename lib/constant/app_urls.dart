@@ -59,4 +59,10 @@ class AppUrls {
   static String getnotificaiton = "/agent/notifications/";
 
   static String markAsRead = "/agent/notifications/";
+
+  static String getMyPropertyAgent = "/agent/properties/";
+
+  static String createBoard = "/agent/boards/";
+
+  static String assignBoard = "/agent/boards/";
 }

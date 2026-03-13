@@ -117,15 +117,13 @@ class HomeAgentProvider extends ChangeNotifier {
 
   List<dynamic> propertyType = [];
 
-  Future<void> getPropertyType()async{
-    final  response = await _agentRepository.getPropertyType();
+  Future<void> getPropertyType() async {
+    final response = await _agentRepository.getPropertyType();
     propertyType = response;
-    notifyListeners(); 
+    notifyListeners();
   }
 
-
-
-  Future<void> getPropertySearch(String type)async{
+  Future<void> getPropertySearch(String type) async {
     isLoading = true;
     notifyListeners();
     final response = await _agentRepository.getPropertySearch(type);
@@ -134,9 +132,7 @@ class HomeAgentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   int _selectedTypeIndex = 0; // Default to first item
-
 
   int get selectedTypeIndex => _selectedTypeIndex;
 
@@ -144,15 +140,13 @@ class HomeAgentProvider extends ChangeNotifier {
     _selectedTypeIndex = index;
     notifyListeners(); // This triggers the UI to rebuild
     // You can also trigger your API filter here
-    // fetchProperties(type: propertyType[index]); 
+    // fetchProperties(type: propertyType[index]);
   }
-
 
   OfferModel offerModel = OfferModel();
 
-
-  Future<void> fetchOfferData()async{
-    isLoading = true ;
+  Future<void> fetchOfferData() async {
+    isLoading = true;
     notifyListeners();
     final response = await _agentRepository.getOffer();
     offerModel = response;
@@ -160,47 +154,47 @@ class HomeAgentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> offerAccpet(String id, index)async{
+  Future<bool> offerAccpet(String id, index) async {
     final response = await _agentRepository.offerAccept(id);
-    if(response){
+    if (response) {
       offerModel.results![index].status = "accepted";
       notifyListeners();
     }
     return response;
   }
 
-   Future<bool> offerRejected(String id, index)async{
+  Future<bool> offerRejected(String id, index) async {
     final response = await _agentRepository.offerAccept(id);
-    if(response){
+    if (response) {
       offerModel.results![index].status = "rejected";
       notifyListeners();
     }
     return response;
   }
-    Future<bool> markAsLead(String id, index)async{
+
+  Future<bool> markAsLead(String id, index) async {
     final response = await _agentRepository.offerAccept(id);
-    if(response){
-      offerModel.results![index].isLead =true;
+    if (response) {
+      offerModel.results![index].isLead = true;
       notifyListeners();
     }
     return response;
   }
+
   Results selectedOffer = Results();
   void selectedOfferV(int index) {
-    selectedOffer =  offerModel.results![index];
+    selectedOffer = offerModel.results![index];
     notifyListeners();
   }
 
-
-  Future<bool> makeCounterOffer(String id, Map<String, dynamic> data )async{
-      final response  = await _agentRepository.counterOffer(id, data);
-      return response;
+  Future<bool> makeCounterOffer(String id, Map<String, dynamic> data) async {
+    final response = await _agentRepository.counterOffer(id, data);
+    return response;
   }
 
-
   List<NotificaitonModel> notificationList = [];
-  Future<void>getNotification()async {
-    isLoading =true;
+  Future<void> getNotification() async {
+    isLoading = true;
     notifyListeners();
     final response = await _agentRepository.getNotification();
     notificationList = response;
@@ -208,10 +202,9 @@ class HomeAgentProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> markAsRead(String id, index)async{
-
+  Future<bool> markAsRead(String id, index) async {
     final response = await _agentRepository.markAsRead(id);
-    if(response){
+    if (response) {
       notificationList[index].isRead = true;
       notifyListeners();
     }
@@ -220,12 +213,42 @@ class HomeAgentProvider extends ChangeNotifier {
 
   List<Results> leadList = [];
 
-   Future<void> fetchLeadsData()async{
-    isLoading = true ;
+  Future<void> fetchLeadsData() async {
+    isLoading = true;
     notifyListeners();
     final response = await _agentRepository.getOffer();
     response.results!.forEach((e) => e.isLead == true ? leadList.add(e) : null);
     isLoading = false;
     notifyListeners();
   }
+
+  List<PropertyModel> myPropertyList = [];
+  Future<void> getMyPropertyList() async {
+    isLoading = true;
+    notifyListeners();
+    final reponse = await _agentRepository.getMyPropertyAgent();
+    if (reponse.isNotEmpty) {
+      myPropertyList = reponse;
+      isLoading = false;
+      notifyListeners();
+    } else {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+  Future<String> createQrCode(String propertyId)async{
+    String qrCode = "";
+    final boardId = await _agentRepository.createBoard();
+
+    if(boardId.isNotEmpty || boardId != ""){
+      final response = await _agentRepository.assignBoard(boardId, propertyId);
+      return response;
+    }else{
+      return "";
+    }
+  }
+
+
 }

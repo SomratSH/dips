@@ -15,87 +15,104 @@ class HomeAgent extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<HomeAgentProvider>();
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: provider.isLoading ? Center(child: CircularProgressIndicator(),) : Column(
-            children: [
-              buildHeader(context, provider),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: StatsCard(
-                        title: '🏠 Listings',
-                        value: provider.agentDashboardModel.totalPropertyListing!.toString(),
-                        percentage: '+13%',
-                        iconPath: 'assets/icons/agentHOme.svg',
-                        onTap: () {
-                          debugPrint('Listings tapped');
-                        },
+      body: Stack(
+      children: [
+         SafeArea(
+          child: SingleChildScrollView(
+            child: provider.isLoading ? Center(child: CircularProgressIndicator(),) : Column(
+              children: [
+                buildHeader(context, provider),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: StatsCard(
+                          title: '🏠 Listings',
+                          value: provider.agentDashboardModel.totalPropertyListing == null ? "0": provider.agentDashboardModel.totalPropertyListing.toString(),
+                          percentage: '+13%',
+                          iconPath: 'assets/icons/agentHOme.svg',
+                          onTap: () {
+                            debugPrint('Listings tapped');
+                          },
+                        ),
                       ),
-                    ),
-                    CustomPadding().hPad10,
-                    Expanded(
-                      child: StatsCard(
-                        title: '👁 Views',
-                        value: provider.agentDashboardModel.totalPropertyViews.toString(),
-                        percentage: '+28%',
-                        iconPath: 'assets/icons/eye.svg',
-                        onTap: () {
-                          debugPrint('Listings tapped');
-                        },
+                      CustomPadding().hPad10,
+                      Expanded(
+                        child: StatsCard(
+                          title: '👁 Views',
+                          value: provider.agentDashboardModel.totalPropertyViews.toString(),
+                          percentage: '+28%',
+                          iconPath: 'assets/icons/eye.svg',
+                          onTap: () {
+                            debugPrint('Listings tapped');
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: StatsCard(
-                        title: '💬 Offers',
-                        value: provider.agentDashboardModel.totalOffersReceived.toString(),
-                        percentage: '+5%',
-                        iconPath: 'assets/icons/offer_icon.svg',
-                        onTap: () {
-                          debugPrint('Listings tapped');
-                        },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: StatsCard(
+                          title: '💬 Offers',
+                          value: provider.agentDashboardModel.totalOffersReceived.toString(),
+                          percentage: '+5%',
+                          iconPath: 'assets/icons/offer_icon.svg',
+                          onTap: () {
+                            debugPrint('Listings tapped');
+                          },
+                        ),
                       ),
-                    ),
-                    CustomPadding().hPad10,
-                    Expanded(
-                      child: StatsCard(
-                        title: '📱 QR Scans',
-                        value: provider.agentDashboardModel.totalQrScanned.toString(),
-                        percentage: '+42%',
-                        iconPath: 'assets/icons/scan_icon.svg',
-                        onTap: () {
-                          debugPrint('Listings tapped');
-                        },
+                      CustomPadding().hPad10,
+                      Expanded(
+                        child: StatsCard(
+                          title: '📱 QR Scans',
+                          value: provider.agentDashboardModel.totalQrScanned.toString(),
+                          percentage: '+42%',
+                          iconPath: 'assets/icons/scan_icon.svg',
+                          onTap: () {
+                            debugPrint('Listings tapped');
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: RecentActivityCard(),
-              ),
-            ],
-          ) ,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RecentActivityCard(),
+                ),
+              ],
+            ) ,
+          ),
         ),
+
+       provider.propertyList.isNotEmpty && provider.agentDashboardModel != null ?  Positioned(
+          bottom: 10,
+          right: 10,
+          child: InkWell(
+            onTap: (){  context.push(RoutePath.chatbot);},
+            child: DecoratedBox(decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: const Color(0xFF041E41)
+                    ),
+                    child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SvgPicture.asset("assets/icons/Logo (2).svg"),
+                    ),
+                    ),
+          )
+        
+        
+        ) : SizedBox()
+      ]
+        
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.push(RoutePath.chatbot);
-        },
-        shape: CircleBorder(),
-        backgroundColor: const Color(0xFF041E41),
-        child: SvgPicture.asset("assets/icons/Logo (2).svg"),
-      ),
+      
     );
   }
 }
@@ -139,7 +156,7 @@ Widget buildHeader(BuildContext context, HomeAgentProvider provider) {
                   ),
 
                   Text(
-                   provider.agentProfileModel.agentProfile!.brandName!,
+                   provider.agentProfileModel.agentProfile!.brandName ?? "N/A",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -156,7 +173,7 @@ Widget buildHeader(BuildContext context, HomeAgentProvider provider) {
                 ],
               ),
               InkWell(
-                onTap: () => context.go(RoutePath.notification),
+                onTap: () => context.push(RoutePath.notification),
                 child: DecoratedBox(
                   decoration: ShapeDecoration(
                     color: Colors.white.withValues(alpha: 0.20),

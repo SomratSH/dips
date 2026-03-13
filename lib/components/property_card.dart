@@ -183,7 +183,7 @@ class PropertyCard extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                   ),
                   Text(
-                    distance,
+                    distance + " miles",
                     style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                 ],
