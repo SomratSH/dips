@@ -157,7 +157,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       onPressed: () async {
                         if (nameController.text.isNotEmpty &&
                             phomeController.text.isNotEmpty &&
-                            passwordController.text.isNotEmpty &&
+                            passwordController.text.isNotEmpty  && 
                             emailController.text.isNotEmpty) {
                                CustomLoading.show(context);
                           final response = await provider.signUpUser(
